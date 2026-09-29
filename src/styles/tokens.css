@@ -6,6 +6,9 @@
   --text: #EDEEF0;
   --muted: #8A8F98;
   --accent: #4ADE80;
+  /* Declared exception to the accent-reservation rule: the a11y focus ring.
+     Only :focus-visible may consume this token. */
+  --focus: var(--accent);
 
   /* type */
   --font-sans: 'Geist Variable', system-ui, -apple-system, sans-serif;
@@ -45,7 +48,7 @@ body {
 a { color: inherit; }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--focus);
   outline-offset: 3px;
 }
 

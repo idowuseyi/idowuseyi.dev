@@ -36,6 +36,18 @@ describe('design tokens', () => {
     expect(css).not.toContain('prefers-color-scheme');
   });
 
+  test('defines --focus as the declared exception, resolving to --accent', () => {
+    expect(token('focus')).toBe('var(--accent)');
+  });
+
+  test(':focus-visible consumes --focus, not --accent directly', () => {
+    const match = css.match(/:focus-visible\s*\{([^}]*)\}/);
+    expect(match).not.toBeNull();
+    const rule = match![1];
+    expect(rule).toContain('var(--focus)');
+    expect(rule).not.toContain('var(--accent)');
+  });
+
   test('disables motion under prefers-reduced-motion', () => {
     expect(css).toContain('prefers-reduced-motion: reduce');
   });
