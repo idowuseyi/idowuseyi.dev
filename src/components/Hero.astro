@@ -1,0 +1,83 @@
+---
+import Cta from './Cta.astro';
+import { profile } from '../data/profile';
+---
+<section class="hero">
+  <div class="wrap hero__inner">
+    <p class="hero__pill mono">
+      <span class="hero__dot" aria-hidden="true"></span>{profile.availability}
+    </p>
+
+    <h1 class="hero__title">
+      {profile.headline}<br /><span class="hero__sub">{profile.subhead}</span>
+    </h1>
+
+    <p class="hero__pitch">{profile.pitch}</p>
+
+    <Cta placement="hero" />
+
+    <ul class="hero__competencies mono">
+      {profile.competencies.map((item) => <li>{item}</li>)}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .hero { padding-block: clamp(4rem, 12vh, 8rem) var(--space-xl); }
+  .hero__inner { display: grid; gap: var(--space-l); }
+
+  .hero__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: fit-content;
+    padding: 0.35rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: var(--step--1);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  .hero__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px rgb(74 222 128 / 0.18);
+  }
+
+  .hero__title {
+    font-size: var(--step-3);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    max-width: 18ch;
+  }
+
+  .hero__sub { color: var(--muted); }
+
+  .hero__pitch {
+    max-width: 62ch;
+    color: var(--muted);
+    font-size: var(--step-1);
+    line-height: 1.55;
+  }
+
+  .hero__competencies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+    list-style: none;
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+
+  .hero__competencies li {
+    padding: 0.3rem 0.65rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+</style>
