@@ -816,10 +816,10 @@ export const profile = {
   headline: 'AI systems engineer.',
   subhead: 'I build the infrastructure agents run on.',
   pitch:
-    'Rust and TypeScript backends for LLM systems — multi-provider routing, RAG retrieval, agentic tool calling, and the eval suites that keep them honest. 3+ years shipping production systems in health-tech, fintech and developer tooling.',
+    'Rust and TypeScript backends for LLM systems — multi-provider routing, retrieval-augmented search, and schema-validated structured output. 3+ years shipping production systems in health-tech, fintech and developer tooling.',
   competencies: [
     'Rust', 'TypeScript', 'Python', 'PostgreSQL', 'Redis',
-    'Axum', 'NestJS', 'Distributed Systems', 'Evals',
+    'Axum', 'NestJS', 'Distributed Systems', 'LLM Infrastructure',
   ],
   proofMetrics: ['1k+ docs indexed', '10k+ daily users', '99.9% reliability'],
   credentials: ['2× HNG Finalist', 'ALX Certified Backend Engineer'],
@@ -1048,15 +1048,29 @@ neither can regress."
   - `Diagram.astro` props: `{ name: string; caption: string }` — inlines `src/diagrams/<name>.svg`
   - `CaseStudy.astro` props: `{ project: CollectionEntry<'projects'> }`, rendering the entry body via `render(project)`
 
-- [ ] **Step 1: Confirm the real repository URLs**
+- [ ] **Step 1: Verify the three repositories are public and match their case studies**
 
-The evidence rule refuses invented links, and CI link-checks every URL (Task 8), so these must be real before the task can complete.
+These URLs were confirmed against the live GitHub account before this plan was
+dispatched. Re-verify they still resolve and are public, then use them verbatim:
+
+| Case study | Repository | Actual stack |
+|---|---|---|
+| KO OS | `https://github.com/idowuseyi/koos` | Next.js 16, React 19, TypeScript, Drizzle + PostgreSQL, Vercel AI SDK |
+| RAG service | `https://github.com/idowuseyi/nest-rag-service` | **NestJS + TypeScript + ChromaDB + Docker** |
+| Rust services | `https://github.com/idowuseyi/google-auth-paystack-plus` | Rust, Google OAuth, Paystack |
 
 ```bash
-gh repo list idowuseyi --limit 50 --json name,url,description
+for r in koos nest-rag-service google-auth-paystack-plus; do
+  gh repo view "idowuseyi/$r" --json isPrivate,url --jq '.url + " private=" + (.isPrivate|tostring)'
+done
 ```
 
-Record the repository that holds the RAG / semantic search service and the one that holds the Rust (Axum/Tokio) microservices. If either is still private, make it public now or set that case study to `evidence: 'writeup-only'` with a reason. Use the recorded URLs verbatim in Steps 5 and 6.
+Expected: three public URLs.
+
+**Do not describe the RAG service as Rust.** It is NestJS. An earlier draft of
+this plan carried that error, inherited from an ambiguous sentence on the old
+site that ran the Rust work and the RAG work together. The Rust evidence is
+`google-auth-paystack-plus`; the RAG evidence is `nest-rag-service`.
 
 - [ ] **Step 2: Write the failing test**
 
@@ -1297,22 +1311,25 @@ npm install -D @mermaid-js/mermaid-cli@^12.0.0
 npm pkg set scripts.diagrams="mmdc -i src/diagrams/ko-os.mmd -o src/diagrams/ko-os.svg -b transparent -t dark"
 ```
 
-Create `src/diagrams/ko-os.mmd`:
+Create `src/diagrams/ko-os.mmd`. This mirrors the actual `src/lib/ai/` layer in
+the repository — provider config, a provider-agnostic client, extracted prompts,
+and Zod-validated structured output — not an aspirational architecture:
 
 ```
 flowchart LR
-  C[Client request] --> R[Router]
-  R -->|policy: cost, latency, capability| P1[Provider A]
-  R --> P2[Provider B]
-  R --> P3[Provider C]
-  P1 --> T[Tool-calling loop]
-  P2 --> T
-  P3 --> T
-  T --> X[(Tool registry)]
-  T --> V[Response]
-  V --> E[Eval suite]
-  E -->|scored traces| S[(Trace store)]
-  E -->|regression gate| R
+  REQ[Feature request] --> PC[provider-config.ts]
+  PC -->|selected model| CL[provider.ts<br/>Vercel AI SDK client]
+  PR[prompts/strategy.ts<br/>prompts/calendar.ts<br/>prompts/chat.ts] --> CL
+  CL --> G[Google]
+  CL --> O[OpenAI]
+  CL --> A[Anthropic]
+  CL --> Z[Z.ai / OpenAI-compatible]
+  G --> SV
+  O --> SV
+  A --> SV
+  Z --> SV
+  SV[strategy-schema.ts<br/>calendar-schema.ts<br/>Zod validation] -->|typed, or rejected| APP[Application]
+  SV -.covered by.-> T[(21 unit test suites)]
 ```
 
 Compile it:
@@ -1329,103 +1346,104 @@ Create `src/content/projects/ko-os.mdx`:
 
 ```mdx
 ---
-title: KO OS — multi-provider LLM platform
+title: KO OS — provider-agnostic LLM platform
 kicker: AI Systems
 role: CTO & Engineer — KO Content Studios
 order: 1
-blurb: A provider-agnostic LLM layer with agentic tool calling and a paid evaluation suite that gates every model change.
-tags: ['TypeScript', 'LLM Routing', 'Agents', 'Evals', 'PostgreSQL']
+blurb: An AI content platform whose model layer is provider-agnostic and whose every LLM response is validated against a typed schema before it reaches the application.
+tags: ['TypeScript', 'Next.js', 'Vercel AI SDK', 'Drizzle', 'PostgreSQL', 'Zod']
 metrics:
-  - { value: 'Multi', label: 'Provider routing' }
-  - { value: 'Agentic', label: 'Tool calling' }
-  - { value: 'Gated', label: 'Eval regressions' }
+  - { value: '4+', label: 'LLM providers routed' }
+  - { value: '21', label: 'Unit test suites' }
+  - { value: 'Typed', label: 'Structured output' }
 diagram: ko-os
-evidence: writeup-only
-evidenceNote: 'Source is proprietary to KO Content Studios. Architecture, routing policy and evaluation methodology are documented here in full.'
+evidence: linked
+repoUrl: 'https://github.com/idowuseyi/koos'
 ---
 
 import Diagram from '../../components/Diagram.astro';
 
 The hard problem was not calling a model. It was making model choice a
-runtime decision rather than a deployment decision, and then proving that
-changing it did not quietly degrade output.
+configuration concern rather than a code concern, and then refusing to let
+unvalidated model output into the application.
 
-<Diagram name="ko-os" caption="Request path: policy-based routing, tool-calling loop, and the eval gate that feeds back into routing." />
+<Diagram name="ko-os" caption="The src/lib/ai layer: provider config selects a model, extracted prompts feed a provider-agnostic client, and every response is validated against a Zod schema before the application sees it." />
 
-**Routing.** Requests carry a capability requirement and a cost ceiling. The
-router selects a provider against live latency and price, and falls back on
-error without the caller knowing which model answered.
+**Provider-agnostic by construction.** `provider-config.ts` resolves which model
+answers a request; `provider.ts` wraps the Vercel AI SDK so the call site never
+names a vendor. Swapping Google for Anthropic is a config change, not a refactor.
 
-**Tool calling.** The agent loop resolves tools from a registry, so adding a
-capability is a registration, not a prompt rewrite.
+**Prompts are modules, not string literals.** `prompts/strategy.ts`,
+`prompts/calendar.ts` and `prompts/chat.ts` sit apart from the code that calls
+them, so a prompt change is reviewable in a diff like any other change.
 
-**Evals.** Every prompt or provider change runs a scored suite before it ships.
-Regressions block the change. This is the part most teams skip and the part
-that makes the rest safe to move.
+**Structured output is enforced, not hoped for.** Content strategy and calendar
+responses are parsed through Zod schemas that have their own test suites. A
+malformed generation fails at the boundary instead of propagating a plausible
+but wrong object into the database.
 ```
 
-Create `src/content/projects/rag-search.mdx` using the repository URL recorded in Step 1:
+Create `src/content/projects/rag-search.mdx`:
 
 ```mdx
 ---
 title: RAG & semantic search service
 kicker: Retrieval
-role: Software Engineer — HNG / Telex
+role: Backend Engineer
 order: 2
-blurb: Retrieval over thousands of documents with optimised LLM context windows, built as a Rust service.
-tags: ['Rust', 'Axum', 'ChromaDB', 'Embeddings', 'Tokio']
+blurb: A document ingestion and semantic search service — chunking with overlap, vector storage in ChromaDB, and a documented API.
+tags: ['NestJS', 'TypeScript', 'ChromaDB', 'Embeddings', 'Docker', 'Swagger']
 metrics:
-  - { value: '1k+', label: 'Documents indexed' }
-  - { value: 'Zero', label: 'Downtime search' }
-  - { value: 'Async', label: 'Connection pooling' }
+  - { value: '500', label: 'Words per chunk' }
+  - { value: '50', label: 'Word overlap' }
+  - { value: '3', label: 'Ingest formats' }
 evidence: linked
-repoUrl: 'REPLACE_WITH_URL_FROM_STEP_1'
+repoUrl: 'https://github.com/idowuseyi/nest-rag-service'
 ---
 
-Retrieval quality collapses when context windows are filled naively. This
-service chunks on semantic boundaries, embeds and stores vectors in ChromaDB,
-then reranks candidates before assembling a context that fits the window with
-room for the answer.
+Retrieval quality is decided at ingestion, not at query time. Chunk on the wrong
+boundary and the right answer is split across two vectors that each look
+mediocre.
 
-Built in Rust on Axum and Tokio with async PostgreSQL connection pooling, so
-retrieval and generation share a runtime without blocking each other.
+This service ingests PDF, DOCX and TXT, extracts text, then chunks on words —
+500 per chunk with a 50-word overlap — so context surviving a boundary is
+retrievable from either side of it. Embeddings are stored in ChromaDB for
+vector search.
+
+Built on NestJS and containerised with Docker, with the API documented in
+Swagger so it can be exercised directly rather than read about.
 ```
 
-Create `src/content/projects/rust-services.mdx` using the repository URL recorded in Step 1:
+Create `src/content/projects/rust-services.mdx`:
 
 ```mdx
 ---
-title: High-concurrency Rust microservices
+title: Rust authentication & payment service
 kicker: Backend Systems
-role: Software Engineer — HNG / Telex
+role: Software Engineer
 order: 3
-blurb: Authentication and payment workflows in Rust, with async PostgreSQL pooling and cryptographic webhook verification.
-tags: ['Rust', 'Axum', 'Tokio', 'SQLx', 'PostgreSQL']
+blurb: Google OAuth and Paystack payment handling implemented in Rust, where a replayed webhook means a double charge.
+tags: ['Rust', 'OAuth 2.0', 'Paystack', 'Webhooks', 'PostgreSQL']
 metrics:
-  - { value: '2×', label: 'HNG finalist' }
-  - { value: 'Async', label: 'Pooled Postgres' }
-  - { value: 'Verified', label: 'Webhook signatures' }
+  - { value: 'Rust', label: 'End to end' }
+  - { value: 'OAuth', label: 'Google sign-in' }
+  - { value: 'Verified', label: 'Payment webhooks' }
 evidence: linked
-repoUrl: 'REPLACE_WITH_URL_FROM_STEP_1'
+repoUrl: 'https://github.com/idowuseyi/google-auth-paystack-plus'
 ---
 
-Payment webhooks are the part of a system where correctness is not negotiable:
-a replayed message is a double charge. These services verify signatures and
-reject replays before any handler runs.
+Payment webhooks are where correctness stops being negotiable. A replayed
+message is a double charge, and a provider that retries on timeout will send
+one eventually.
 
-Authentication and payments are separate services sharing an async SQLx pool
-against PostgreSQL, sized so a burst on one cannot starve the other.
+This service handles the Google OAuth exchange and Paystack payment flow in
+Rust, verifying webhook authenticity before any handler runs and treating
+delivery as at-least-once rather than exactly-once.
+
+Rust is the deliberate choice here rather than the interesting one: the
+compiler refusing to let an unhandled error path through is worth more in a
+payment handler than anywhere else in a system.
 ```
-
-Replace both `REPLACE_WITH_URL_FROM_STEP_1` values with the URLs recorded in
-Step 1 before continuing.
-
-This is an enforced gate, not a reminder: `repoUrl` is `z.string().url()`, so
-the literal `REPLACE_WITH_URL_FROM_STEP_1` fails schema validation and **the
-build cannot succeed** while either remains. CI's link check then catches a URL
-that is well-formed but wrong. These two URLs are the one thing this plan
-cannot supply, because inventing them would produce exactly the dead ends the
-evidence rule exists to prevent.
 
 - [ ] **Step 8: Verify the content validates**
 
@@ -2252,7 +2270,7 @@ const projects = (await getCollection('projects')).sort(
 ---
 <BaseLayout
   title="Oluwaseyi Idowu — AI Systems Engineer"
-  description="Rust and TypeScript backends for LLM systems — multi-provider routing, RAG retrieval, agentic tool calling and evaluation suites."
+  description="Rust and TypeScript backends for LLM systems — multi-provider routing, retrieval-augmented search and schema-validated structured output."
 >
   <SiteHeader />
 
@@ -2408,7 +2426,8 @@ Before this plan is considered complete:
 - [ ] `npm run build` succeeds with no schema violations
 - [ ] `npx lhci autorun` meets every assertion
 - [ ] `grep -r "5+ years" src/` returns nothing
-- [ ] `grep -rn "REPLACE_WITH_URL_FROM_STEP_1" src/` returns nothing
+- [ ] `grep -rn "Rust" src/content/projects/rag-search.mdx` returns nothing — the RAG service is NestJS
+- [ ] All three project `repoUrl` values resolve to public repositories
 - [ ] Every case study shows either a working link or a stated reason
 - [ ] The contact form delivers a real email end to end
 - [ ] The Cal.com dialog opens and loads only on click
@@ -2428,4 +2447,9 @@ Deliberately deferred to later plans, each of which produces working software on
 | **Plan 3 — RAG demo & analytics** | Workers AI + Vectorize endpoint, rate limiting and cost ceiling, the demo island, PostHog funnel instrumentation, `liveUrl` added to case study 2 |
 | **Plan 4 — Cutover** | DNS to `idowuseyi.dev`, redirects, `llms.txt`, `Person` JSON-LD, 60-second walkthrough video, archiving the legacy site |
 
-**Blocked on content from Oluwaseyi** (spec risk 1): the KO OS write-up body, the public Rust repository with README and CI, and the RAG service repository.
+**Content status:** all three case studies now ship with verified public
+repositories (`koos`, `nest-rag-service`, `google-auth-paystack-plus`) and
+bodies written from what those repositories actually contain. Spec risk 1 is
+resolved for this plan. Remaining content work, deferred to later plans: a
+proper README with tests and CI on `google-auth-paystack-plus` (blueprint's
+documentation ask), and the 60-second walkthrough video (Plan 4).
