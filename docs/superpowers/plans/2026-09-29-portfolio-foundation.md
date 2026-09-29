@@ -567,7 +567,9 @@ The spec's central guarantee: no project can ship that a recruiter cannot verify
   - `src/schemas/project.ts` exporting `projectSchema` (a Zod schema) and the type `Project`.
   - Frontmatter contract for `src/content/projects/*.mdx`:
     `title: string`, `kicker: string`, `role: string`, `order: number`, `blurb: string`, `tags: string[]` (>= 1), `metrics: { value: string; label: string }[]` (1–3), `diagram?: string`, plus the evidence fields below.
-  - Evidence variants: `evidence: 'linked'` with at least one of `liveUrl` / `repoUrl`; or `evidence: 'writeup-only'` with `evidenceNote` of at least 20 characters.
+  - Evidence variants: `evidence: 'linked'` with at least one of `liveUrl` / `repoUrl`; or `evidence: 'writeup-only'` with `evidenceNote` of at least 20 characters **after trimming**.
+  - `liveUrl` and `repoUrl` accept **http/https only** — a `javascript:` or `ftp:` URI is URL-shaped but not recruiter-verifiable, so it must fail validation.
+  - Both branches are `.strict()`: an unrecognised frontmatter key is a validation error naming the key, so a typo such as `livUrl` fails loudly instead of being silently stripped. Verified against a real Astro build — the glob loader injects no extra keys. **Case studies in Task 5 must therefore carry only the fields named above.**
   - Collection name is `projects`, queried with `getCollection('projects')`.
 
 - [ ] **Step 1: Write the failing test**
@@ -682,27 +684,45 @@ const common = {
   diagram: z.string().optional(),
 };
 
+// Only http/https are accepted evidence links: a `javascript:` or `ftp:` URI
+// may be shaped like a URL but is not something a recruiter can click through
+// to verify, so those schemes must fail validation, not just malformed
+// strings. Zod 4's built-in `protocol` constraint on `.url()` handles this.
+const evidenceUrl = z.string().url({ protocol: /^https?$/ });
+
 const linked = z
   .object({
     ...common,
     evidence: z.literal('linked'),
-    liveUrl: z.string().url().optional(),
-    repoUrl: z.string().url().optional(),
+    liveUrl: evidenceUrl.optional(),
+    repoUrl: evidenceUrl.optional(),
   })
+  .strict()
   .refine((data) => Boolean(data.liveUrl || data.repoUrl), {
     message: 'A linked project must define liveUrl or repoUrl.',
     path: ['evidence'],
   });
 
-const writeupOnly = z.object({
-  ...common,
-  evidence: z.literal('writeup-only'),
-  evidenceNote: z
-    .string()
-    .min(20, 'A writeup-only project must explain why it has no public link.'),
-});
+const writeupOnly = z
+  .object({
+    ...common,
+    evidence: z.literal('writeup-only'),
+    // .min(20) alone counts raw characters, so a string of spaces would pass.
+    // Trim first so the length check reflects actual justification content.
+    evidenceNote: z
+      .string()
+      .trim()
+      .min(20, 'A writeup-only project must explain why it has no public link.'),
+  })
+  .strict();
 
-export const projectSchema = z.union([linked, writeupOnly]);
+// A discriminated union keyed on `evidence` gives far better diagnostics than a
+// plain union: Zod unions report every branch's failure, which is unreadable
+// when these errors surface as build failures a human has to read. Zod (as
+// re-exported by astro/zod) accepts a refined object schema as a
+// discriminatedUnion branch here, so the `linked` branch's evidence-URL check
+// still runs.
+export const projectSchema = z.discriminatedUnion('evidence', [linked, writeupOnly]);
 
 export type Project = z.infer<typeof projectSchema>;
 ```
