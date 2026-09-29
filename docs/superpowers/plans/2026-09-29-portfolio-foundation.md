@@ -21,7 +21,14 @@ Every task's requirements implicitly include this section.
 - **Node 24**, package manager `npm`. Commands run from the repo root.
 - **Astro 7.3.5** or later. Content config lives at `src/content.config.ts` (NOT `src/content/config.ts`). Loaders come from `astro/loaders`; zod comes from `astro/zod`; entries render via `render(entry)` imported from `astro:content` (NOT `entry.render()`).
 - **Dark theme only.** No light-mode styles, no theme toggle, no `prefers-color-scheme` branches.
-- **Accent `#4ADE80` is reserved exclusively** for calls to action, live/availability indicators and diagram highlights. It must never be used for body text, borders, or decoration.
+- **Accent `#4ADE80` is reserved exclusively** for calls to action, live/availability
+  indicators and diagram highlights. It must never be used for body text, borders, or
+  decoration. **One declared exception:** the accessibility focus ring, which consumes
+  accent through the dedicated `--focus` token (`--focus: var(--accent)`) rather than
+  referencing `--accent` directly. A focus indicator is a functional state signal, not
+  decoration; routing it through its own token keeps the exception explicit in the code
+  and lets focus colour diverge later without touching CTAs. Nothing other than
+  `:focus-visible` may use `--focus`.
 - **Tenure copy is exactly `3+ years`.** The string `5+ years` must not appear anywhere in `src/`. This is asserted by a test.
 - **Every project must satisfy the evidence rule** (Task 3): a `liveUrl`, a `repoUrl`, or `evidence: 'writeup-only'` with a stated reason. The build fails otherwise.
 - **Performance budget, asserted in CI:** LCP < 1.5s on simulated 3G, < 30KB blocking JS on the homepage, Lighthouse >= 95 in all four categories.
@@ -299,7 +306,7 @@ Encodes the design system as CSS custom properties and asserts it with a test, s
 **Interfaces:**
 - Consumes: the Vitest harness from Task 1.
 - Produces:
-  - `src/styles/tokens.css` exposing `--base --surface --border --text --muted --accent --font-sans --font-mono --step--1 --step-0 --step-1 --step-2 --step-3 --space-s --space-m --space-l --space-xl --radius --motion-fast --motion-base`
+  - `src/styles/tokens.css` exposing `--base --surface --border --text --muted --accent --focus --font-sans --font-mono --step--1 --step-0 --step-1 --step-2 --step-3 --space-s --space-m --space-l --space-xl --radius --motion-fast --motion-base`
   - `BaseLayout.astro` with props `{ title: string; description: string; canonicalPath?: string }` and a default slot.
   - `src/lib/contrast.ts` exporting `contrastRatio(hexA: string, hexB: string): number`
 
@@ -398,6 +405,10 @@ Create `src/styles/tokens.css`:
   --muted: #8A8F98;
   --accent: #4ADE80;
 
+  /* Declared exception to the accent-reservation rule: the a11y focus ring.
+     Only :focus-visible may consume this token. */
+  --focus: var(--accent);
+
   /* type */
   --font-sans: 'Geist Variable', system-ui, -apple-system, sans-serif;
   --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
@@ -436,7 +447,7 @@ body {
 a { color: inherit; }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--focus);
   outline-offset: 3px;
 }
 
