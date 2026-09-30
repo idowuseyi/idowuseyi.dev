@@ -12,7 +12,17 @@ beforeAll(async () => {
 
 describe('experience timeline', () => {
   test('retains every employer from the previous site', () => {
-    for (const org of ['Theraptly', 'HNG', 'Jethro', 'Sparkly', 'PayRent', 'Fitzzy', 'Techivate', 'OpenReplay']) {
+    for (const org of [
+      'KO Content Studios',
+      'Internova',
+      'Sparkly',
+      'HNG',
+      'PayRent',
+      'Jethro',
+      'Fitzzy',
+      'Techivate',
+      'OpenReplay',
+    ]) {
       expect(html).toContain(org);
     }
   });
@@ -21,12 +31,23 @@ describe('experience timeline', () => {
     expect(html).toContain('10k+');
   });
 
-  test('lists eight roles', () => {
-    expect(experience).toHaveLength(8);
+  test('preserves the Fitzzy leadership content', () => {
+    expect(html).toContain('Docker');
+    expect(html).toContain('Kubernetes');
+    expect(html).toContain('mentoring');
+  });
+
+  test('preserves the HNG open-source content', () => {
+    expect(html).toContain('boilerplate');
+    expect(html).toContain('50+');
+  });
+
+  test('lists nine roles', () => {
+    expect(experience).toHaveLength(9);
   });
 
   test('is ordered most recent first', () => {
-    expect(experience[0].period).toContain('2025');
+    expect(experience[0].period).toContain('2026');
     expect(experience[experience.length - 1].period).toBe('2023');
   });
 
