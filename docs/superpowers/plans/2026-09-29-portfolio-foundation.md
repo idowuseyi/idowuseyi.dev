@@ -1320,7 +1320,9 @@ const data = project.data;
     border-bottom: 1px solid var(--border);
     padding-bottom: 2px;
   }
-  .case__link:hover { border-color: var(--accent); }
+  /* Accent is reserved for live indicators: only the live-demo link gets it. */
+  .case__link:hover { border-color: var(--text); }
+  .case__link--live:hover { border-color: var(--accent); }
   .case__link--live { color: var(--accent); }
   .case__dot {
     width: 6px;
@@ -1339,10 +1341,21 @@ Expected: PASS — 2 tests passed.
 
 - [ ] **Step 6: Add the diagram pipeline and compile the KO OS diagram**
 
+The Mermaid toolchain pulls Puppeteer, which downloads a Chromium binary on
+install. The SVG is a **committed build artifact**, so the tool that produces it
+is a dependency of *editing the diagram*, not of the project — keeping it out of
+`devDependencies` is what makes the plan's "CI needs no browser" claim true.
+Fetch it on demand instead:
+
 ```bash
-npm install -D @mermaid-js/mermaid-cli@^12.0.0
-npm pkg set scripts.diagrams="mmdc -i src/diagrams/ko-os.mmd -o src/diagrams/ko-os.svg -b transparent -t dark"
+npm pkg set scripts.diagrams="npx --yes @mermaid-js/mermaid-cli@^12.0.0 -i src/diagrams/ko-os.mmd -o src/diagrams/ko-os.svg -b transparent -t dark && node scripts/theme-diagram.mjs"
 ```
+
+Raw `mmdc` output hardcodes its own colours, so it will not recolour with the
+design system. `scripts/theme-diagram.mjs` rewrites the generated style block and
+`defs` to consume `var(--text)`, `var(--surface)`, `var(--border)`, `var(--muted)`
+and `currentColor`, with one `var(--accent)` highlight on the validation node.
+Committing that script is what makes regeneration reproducible.
 
 Create `src/diagrams/ko-os.mmd`. This mirrors the actual `src/lib/ai/` layer in
 the repository — provider config, a provider-agnostic client, extracted prompts,
