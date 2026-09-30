@@ -1399,11 +1399,12 @@ order: 1
 blurb: An AI content platform whose model layer is provider-agnostic and whose every LLM response is validated against a typed schema before it reaches the application.
 tags: ['TypeScript', 'Next.js', 'Vercel AI SDK', 'Drizzle', 'PostgreSQL', 'Zod']
 metrics:
-  - { value: '4+', label: 'LLM providers routed' }
+  - { value: '6', label: 'LLM providers routed' }
   - { value: '21', label: 'Unit test suites' }
   - { value: 'Typed', label: 'Structured output' }
 diagram: ko-os
 evidence: linked
+liveUrl: 'https://app.kocontentstudios.com'
 repoUrl: 'https://github.com/idowuseyi/koos'
 ---
 
@@ -1520,7 +1521,7 @@ Absorbs the fourth case study and the standalone Leadership section from the old
 
 **Interfaces:**
 - Consumes: tokens from Task 2.
-- Produces: `src/data/experience.ts` exporting `experience: { period: string; title: string; org: string; summary: string }[]`, ordered most recent first. `Timeline.astro` takes no props.
+- Produces: `src/data/experience.ts` exporting `experience: { period: string; title: string; org: string; summary: string }[]`, ordered most recent first. **Nine entries, reconciled against the authoritative `references/resume.json` in the job-agent repo** — the plan's original eight were drawn from the old website and diverged from the record in six places. `Timeline.astro` takes no props.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1541,7 +1542,17 @@ beforeAll(async () => {
 
 describe('experience timeline', () => {
   test('retains every employer from the previous site', () => {
-    for (const org of ['Theraptly', 'HNG', 'Jethro', 'Sparkly', 'PayRent', 'Fitzzy', 'Techivate', 'OpenReplay']) {
+    for (const org of [
+      'KO Content Studios',
+      'Internova',
+      'Sparkly',
+      'HNG',
+      'PayRent',
+      'Jethro',
+      'Fitzzy',
+      'Techivate',
+      'OpenReplay',
+    ]) {
       expect(html).toContain(org);
     }
   });
@@ -1550,12 +1561,23 @@ describe('experience timeline', () => {
     expect(html).toContain('10k+');
   });
 
-  test('lists eight roles', () => {
-    expect(experience).toHaveLength(8);
+  test('preserves the Fitzzy leadership content', () => {
+    expect(html).toContain('Docker');
+    expect(html).toContain('Kubernetes');
+    expect(html).toContain('mentoring');
+  });
+
+  test('preserves the HNG open-source content', () => {
+    expect(html).toContain('boilerplate');
+    expect(html).toContain('50+');
+  });
+
+  test('lists nine roles', () => {
+    expect(experience).toHaveLength(9);
   });
 
   test('is ordered most recent first', () => {
-    expect(experience[0].period).toContain('2025');
+    expect(experience[0].period).toContain('2026');
     expect(experience[experience.length - 1].period).toBe('2023');
   });
 
@@ -1577,32 +1599,39 @@ Create `src/data/experience.ts`:
 ```ts
 export const experience = [
   {
+    period: '2026 — Present',
+    title: 'Co-Founder & CTO',
+    org: 'KO Content Studios — KO OS',
+    summary:
+      'Co-founded the studio and built KO OS as its sole engineer, from first commit to production in three months — ~105k lines of TypeScript on Next.js 16, React 19 and PostgreSQL/Drizzle. Designed a provider-agnostic LLM layer on the Vercel AI SDK switching between six text providers, and a brand-aware assistant with function-calling tools over structured brand records.',
+  },
+  {
     period: '2025 — Present',
-    title: 'Lead Fullstack Engineer',
-    org: 'Theraptly — Health-Tech Platform',
+    title: 'Fullstack Engineer / Engineering Lead',
+    org: 'Internova Technology — Theraptly',
     summary:
-      'Lead engineering for a HIPAA-compliant platform and secure document processing system. Custom middleware for PII detection, threat analysis and malicious payload filtering. 50% faster release cycles, 60% fewer unauthorized attempts.',
+      'Lead and sole engineer on the Theraptly LMS, a HIPAA-oriented compliance training platform — ~1,000 of 1,675 commits across a ~184k-line codebase. Built an AI course-generation pipeline on Vertex AI turning compliance documents into schema-validated lessons and quizzes, a multi-tenant RBAC system with a matrix-conformance test suite, and four-tier Stripe billing with webhook handling.',
+  },
+  {
+    period: '2024 — 2026',
+    title: 'Backend Engineer',
+    org: 'Sparkly — Community Monetization Platform',
+    summary:
+      'Owned payments-ledger correctness, background-job reliability and platform security across 243 commits. Eliminated a payout double-spend race with PostgreSQL row-level locking, enforced double-entry accounting invariants in the ledger write path, decomposed a 5,513-line payments god-service into twelve focused services, and restored Paystack webhook HMAC verification after forged charge.success events had been accepted as real.',
+  },
+  {
+    period: '2024 — 2025',
+    title: 'Software Engineer (Rust / NestJS) — 2× Finalist',
+    org: 'HNG Internship (Cohorts 11 & 13)',
+    summary:
+      'Two cohorts, finalist in both. Built high-concurrency Rust microservices (Axum, Tokio, SQLx) for Google Auth and Paystack, a RAG and semantic search service on NestJS and ChromaDB, and the Telex cross-platform desktop app in Tauri 2. Architected a modular NestJS boilerplate adopted by 50+ developers.',
   },
   {
     period: '2025',
-    title: 'Software Engineer — 2× Finalist',
-    org: 'HNG Open Source Engineering (Cohort 11 & 13)',
-    summary:
-      'Contributed to Telex, a real-time communication platform. Built high-concurrency Rust microservices, RAG infrastructure, a cross-platform Tauri 2 desktop app, and AI agents with the Mastra framework. Architected a modular NestJS boilerplate adopted by 50+ developers.',
-  },
-  {
-    period: '2025',
-    title: 'Fullstack Engineer (Contract)',
+    title: 'Fullstack Mobile Engineer (Contract)',
     org: 'PayRent — Real-Estate Platform',
     summary:
-      'Built a real-estate investment and rent management platform — cross-platform mobile app and backend API for tenants, landlords and property managers, with role-based access and real-time chat.',
-  },
-  {
-    period: '2024 — Present',
-    title: 'Backend Engineer',
-    org: 'Sparkly — Community Platform',
-    summary:
-      'Multi-platform community management with automated onboarding, banking-grade 2FA (TOTP), and global payments via Stripe and Flutterwave with cryptographic webhook verification. 50% engagement increase, 40% reduced DB load.',
+      'Built a real-estate investment and rent management platform — cross-platform mobile app and backend API supporting tenants, landlords and property managers, with role-based access and real-time chat.',
   },
   {
     period: '2024 — 2025',
@@ -1613,17 +1642,17 @@ export const experience = [
   },
   {
     period: '2023 — 2024',
-    title: 'Backend Engineer / CTO',
+    title: 'Backend Engineer / Chief Technology Officer',
     org: 'Fitzzy Systems Limited',
     summary:
-      'Led backend architecture and team delivery. Redesigned systems for 50% improved responsiveness. Introduced Docker and Kubernetes, standardizing deployment across production. Ran code reviews, mentoring and knowledge-sharing.',
+      'Led backend architecture and engineering team delivery. Redesigned systems for 50% improved responsiveness. Introduced Docker and Kubernetes, standardizing deployment workflows across production infrastructure. Ran code reviews, mentoring and knowledge-sharing sessions.',
   },
   {
     period: '2023',
-    title: 'Backend Engineer',
+    title: 'Backend Lead (Internship)',
     org: 'Techivate Ltd — Secure E-Commerce',
     summary:
-      'Secure e-commerce platform for military and security agencies. Session management, XSS mitigation and integrated payment flows serving 10k+ daily users on AWS with Redis session caching. 30% checkout improvement, 50% latency reduction.',
+      'Led one of two parallel backend teams building the same e-commerce platform for military and security agencies; my team’s implementation shipped. Implemented httpOnly cookie sessions mitigating XSS for 10k+ daily users, integrated Stripe and Paystack checkout raising checkout success by 30%, and deployed on AWS EC2 with Redis caching that cut API latency by 50%.',
   },
   {
     period: '2023',
