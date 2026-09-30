@@ -1489,9 +1489,10 @@ Expected: build succeeds. If a case study violates the evidence rule, Astro repo
 git add src/components/MetricRow.astro src/components/Diagram.astro src/components/CaseStudy.astro src/diagrams src/content/projects tests/case-study.test.ts package.json package-lock.json
 git commit -m "feat: case study components, diagram pipeline and three entries
 
-Mermaid compiles at author time into committed SVGs, so diagrams cost zero
-runtime JavaScript and CI needs no browser. KO OS ships as writeup-only with
-a stated reason; the other two carry public repositories."
+Mermaid compiles at author time into committed SVGs and the generated colours
+are rewritten to design tokens, so diagrams cost zero runtime JavaScript, need
+no browser in CI, and recolour with the theme. All three case studies ship as
+evidence: linked against public repositories."
 ```
 
 ---
