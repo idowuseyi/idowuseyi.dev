@@ -39,7 +39,7 @@ export const experience = [
     title: 'Frontend Engineer',
     org: 'Jethro Ltd — Fintech Products',
     summary:
-      'Led frontend for PayCollect and DocStream — payment collection workflows and document processing pipelines with role-based views, JWT auth and real-time analytics.',
+      'Led frontend for PayCollect and JDelivery — payment collection workflows and document processing pipelines with role-based views, JWT auth and real-time analytics.',
   },
   {
     period: '2023 — 2024',
