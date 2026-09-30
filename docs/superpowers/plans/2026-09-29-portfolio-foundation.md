@@ -911,7 +911,8 @@ const { placement, align = 'start' } = Astro.props;
   .cta:hover { transform: translateY(-1px); }
 
   .cta--primary { background: var(--accent); color: var(--base); }
-  .cta--primary:hover { background: #6ee79b; }
+  /* Derived from --accent so it tracks the token rather than going stale. */
+  .cta--primary:hover { background: color-mix(in srgb, var(--accent) 82%, white); }
 
   .cta--secondary {
     background: transparent;
@@ -1009,7 +1010,8 @@ import { profile } from '../data/profile';
     height: 7px;
     border-radius: 50%;
     background: var(--accent);
-    box-shadow: 0 0 0 3px rgb(74 222 128 / 0.18);
+    /* Derived from --accent so it tracks the token rather than going stale. */
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
   }
 
   .hero__title {
