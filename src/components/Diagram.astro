@@ -1,0 +1,35 @@
+---
+import { readFileSync } from 'node:fs';
+
+interface Props {
+  name: string;
+  caption: string;
+}
+
+const { name, caption } = Astro.props;
+const svg = readFileSync(`src/diagrams/${name}.svg`, 'utf8');
+---
+<figure class="diagram">
+  <div class="diagram__canvas" set:html={svg} />
+  <figcaption class="diagram__caption mono">{caption}</figcaption>
+</figure>
+
+<style>
+  .diagram {
+    margin-block: var(--space-l);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--space-l);
+  }
+  .diagram__canvas :global(svg) {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+  }
+  .diagram__caption {
+    margin-top: var(--space-m);
+    color: var(--muted);
+    font-size: var(--step--1);
+  }
+</style>

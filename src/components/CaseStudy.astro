@@ -1,0 +1,101 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
+import MetricRow from './MetricRow.astro';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const data = project.data;
+---
+<article class="case reveal">
+  <header class="case__head">
+    <p class="case__kicker mono">{data.kicker}</p>
+    <h3 class="case__title">{data.title}</h3>
+    <p class="case__role mono">{data.role}</p>
+    <p class="case__blurb">{data.blurb}</p>
+  </header>
+
+  <MetricRow metrics={data.metrics} />
+
+  <div class="case__body">
+    <Content />
+  </div>
+
+  <ul class="case__tags mono">
+    {data.tags.map((tag) => <li>{tag}</li>)}
+  </ul>
+
+  <div class="case__evidence">
+    {data.evidence === 'linked' && data.liveUrl && (
+      <a class="case__link case__link--live" href={data.liveUrl}>
+        <span class="case__dot" aria-hidden="true"></span>Live demo
+      </a>
+    )}
+    {data.evidence === 'linked' && data.repoUrl && (
+      <a class="case__link" href={data.repoUrl}>Source code</a>
+    )}
+    {data.evidence === 'writeup-only' && (
+      <p class="case__note">{data.evidenceNote}</p>
+    )}
+  </div>
+</article>
+
+<style>
+  .case {
+    padding-block: var(--space-xl);
+    border-top: 1px solid var(--border);
+    display: grid;
+    gap: var(--space-l);
+  }
+  .case__head { display: grid; gap: var(--space-s); }
+  .case__kicker {
+    color: var(--muted);
+    font-size: var(--step--1);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .case__title {
+    font-size: var(--step-2);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .case__role { color: var(--muted); font-size: var(--step--1); }
+  .case__blurb { max-width: 68ch; color: var(--muted); }
+  .case__body { max-width: 68ch; display: grid; gap: var(--space-m); }
+  .case__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+    list-style: none;
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+  .case__tags li {
+    padding: 0.25rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+  }
+  .case__evidence { display: flex; flex-wrap: wrap; gap: var(--space-m); align-items: center; }
+  .case__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: var(--step--1);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 2px;
+  }
+  .case__link:hover { border-color: var(--accent); }
+  .case__link--live { color: var(--accent); }
+  .case__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .case__note { color: var(--muted); font-size: var(--step--1); max-width: 56ch; }
+</style>
