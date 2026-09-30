@@ -1,0 +1,92 @@
+---
+import { experience } from '../data/experience';
+---
+<section class="timeline" id="experience">
+  <div class="wrap">
+    <h2 class="timeline__title">Experience</h2>
+    <p class="timeline__lede">A track record of increasing scope.</p>
+
+    <ol class="timeline__list">
+      {experience.map((role) => (
+        <li class="timeline__item reveal">
+          <details>
+            <summary>
+              <span class="timeline__period mono">{role.period}</span>
+              <span class="timeline__role">{role.title}</span>
+              <span class="timeline__org">{role.org}</span>
+              <span class="timeline__indicator" aria-hidden="true"></span>
+            </summary>
+            <p class="timeline__summary">{role.summary}</p>
+          </details>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .timeline { padding-block: var(--space-xl); }
+  .timeline__title {
+    font-size: var(--step-2);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .timeline__lede { color: var(--muted); margin-top: var(--space-s); }
+  .timeline__list { list-style: none; margin-top: var(--space-l); }
+
+  .timeline__item { border-top: 1px solid var(--border); }
+  .timeline__item:last-child { border-bottom: 1px solid var(--border); }
+
+  summary {
+    display: grid;
+    grid-template-columns: 10rem 1fr auto;
+    align-items: baseline;
+    gap: var(--space-s) var(--space-m);
+    padding-block: var(--space-m);
+    cursor: pointer;
+    list-style: none;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary:hover .timeline__role { color: var(--accent); }
+
+  .timeline__period { color: var(--muted); font-size: var(--step--1); }
+  .timeline__role { font-weight: 500; }
+  .timeline__org {
+    grid-column: 2;
+    color: var(--muted);
+    font-size: var(--step--1);
+  }
+
+  /* Disclosure indicator: replaces the suppressed default marker so the
+     row still communicates that it expands, without any script — state
+     comes entirely from the native [open] attribute on <details>. */
+  .timeline__indicator {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    align-self: center;
+    justify-self: end;
+    width: 0.6em;
+    height: 0.6em;
+    border-right: 1.5px solid var(--muted);
+    border-bottom: 1.5px solid var(--muted);
+    transform: rotate(-45deg);
+    transition: transform var(--motion-fast) var(--ease);
+  }
+  details[open] .timeline__indicator {
+    transform: rotate(45deg);
+  }
+
+  .timeline__summary {
+    grid-column: 2;
+    max-width: 68ch;
+    color: var(--muted);
+    font-size: var(--step--1);
+    padding: 0 0 var(--space-m) 0;
+  }
+
+  @media (max-width: 640px) {
+    summary { grid-template-columns: 1fr auto; }
+    .timeline__org, .timeline__summary { grid-column: 1; }
+    .timeline__indicator { grid-column: 2; grid-row: 1; }
+  }
+</style>
