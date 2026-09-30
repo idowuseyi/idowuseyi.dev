@@ -45,7 +45,8 @@ import { profile } from '../data/profile';
     height: 7px;
     border-radius: 50%;
     background: var(--accent);
-    box-shadow: 0 0 0 3px rgb(74 222 128 / 0.18);
+    /* derived from --accent so a token change keeps the glow in sync */
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
   }
 
   .hero__title {
