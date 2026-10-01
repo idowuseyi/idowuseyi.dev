@@ -71,3 +71,46 @@ mermaid's hardcoded colours onto this project's design tokens
 (`src/styles/tokens.css`). Deliberately not a `devDependency`: `npm ci`
 should never need to download a browser, since the compiled SVG is already
 committed and CI never invokes this script.
+
+## Known gaps
+
+**Type checking is not gated in CI.** The plan's intent was `astro check`,
+but that cannot run under this project's pinned TypeScript (`^7.0.2`) —
+confirmed empirically, not assumed. Plain `tsc --noEmit` does run, but
+currently reports 7 errors that are tooling artifacts rather than real
+defects: 6 are `TS2307: Cannot find module '*.astro'` because `tsc` cannot
+parse Astro components at all, and 1 is `getViteConfig`'s return type not
+declaring Vitest's `test` key (see `vitest.config.ts`). A gate that cannot
+see the component code it claims to check would be false confidence, so it
+has been left out of CI rather than added as a check that always "passes"
+without verifying anything. **Fix:** align the TypeScript version with one
+`astro check` supports, then wire `astro check` (not bare `tsc`) into CI.
+
+**`Diagram.astro` fails inside the real Cloudflare build pipeline.**
+`Diagram.astro` resolves the SVG it inlines with
+`fileURLToPath(new URL(`../diagrams/${name}.svg`, import.meta.url))`. That
+resolution works under Vitest/Node (every existing test using the component
+passes) and was never exercised against a real `astro build` before Task 8,
+because no page imported `CaseStudy` (and therefore `Diagram`) until the
+homepage was assembled. Once `index.astro` renders the case studies,
+`npm run build` fails while prerendering `/`:
+
+```
+Error: Failed to prerender https://idowuseyi.dev/: Invalid URL string.
+```
+
+Root cause, confirmed with a temporary debug probe inside the Cloudflare
+adapter's prerender environment: `import.meta.url` is `undefined` in that
+environment (it runs component frontmatter inside workerd via the adapter's
+own preview/prerender server, not plain Node), so
+`new URL(relative, undefined)` throws before `readFileSync` ever runs. The
+failure reproduces with a trivial placeholder SVG and with `<Diagram>` used
+directly on a page with no MDX/content-collection involvement at all, so it
+is specific to that path-resolution strategy, not to the diagram's content
+or to MDX. This blocks `npm run build`, and therefore blocks the link check
+and Lighthouse budget steps in CI, until it's fixed. **Fix (not applied
+here — `Diagram.astro` is out of scope for the task that found this):**
+resolve the SVG without depending on `import.meta.url` inside that
+environment — for example, import each diagram's SVG as a Vite `?raw`
+asset at the top of the module instead of reading it from disk by a
+runtime-computed path.

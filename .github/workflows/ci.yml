@@ -5,7 +5,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -14,5 +14,15 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm test
-      - run: npm run build
+      - name: Unit tests
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Check every outbound link resolves
+        run: npx --yes linkinator ./dist/client --recurse --silent --skip "linkedin.com"
+      - name: Performance budget
+        # ubuntu-latest already ships Chrome; @lhci/cli drives it directly, so
+        # no browser install step is added here. --no-sandbox (set in
+        # lighthouserc.json's chromeFlags) is required because the Actions
+        # runner executes as root.
+        run: npx lhci autorun

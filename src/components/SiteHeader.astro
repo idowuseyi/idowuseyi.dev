@@ -1,0 +1,48 @@
+---
+import Brand from './Brand.astro';
+---
+<header class="header">
+  <div class="wrap header__inner">
+    <Brand />
+    <nav class="header__nav mono">
+      <a href="#work">Work</a>
+      <a href="#experience">Experience</a>
+      <a href="#contact">Contact</a>
+      <a class="header__cta" href="#contact" data-cta="book" data-placement="header">Book a call</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: color-mix(in srgb, var(--base) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 0.8rem;
+  }
+  .header__nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-m);
+    font-size: var(--step--1);
+  }
+  .header__nav a { color: var(--muted); text-decoration: none; }
+  .header__nav a:hover { color: var(--text); }
+  .header__cta {
+    color: var(--base) !important;
+    background: var(--accent);
+    padding: 0.4rem 0.85rem;
+    border-radius: 6px;
+  }
+  @media (max-width: 560px) {
+    .header__nav a:not(.header__cta) { display: none; }
+  }
+</style>
