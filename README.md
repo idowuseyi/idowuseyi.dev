@@ -32,13 +32,21 @@ Never commit real values for these; `wrangler secret put` prompts for the
 value interactively and stores it only in the Cloudflare account's secret
 store.
 
-**Pre-launch requirement: verify the Resend sender domain.** `src/pages/api/contact.ts`
-sends `from: 'idowuseyi.dev <noreply@idowuseyi.dev>'`, which requires
-`idowuseyi.dev` to be added and verified as a sending domain in the Resend
-account (SPF/DKIM records set and confirmed). If the site goes live with both
-secrets set but the domain unverified, Resend returns 403 on every send, every
-contact-form submission silently fails, and the site looks correctly
-configured. Verify this in the Resend dashboard before launch.
+**Pre-launch requirement: register the domain.** `idowuseyi.dev` is the
+canonical domain throughout this project (`astro.config.mjs`, the canonical and
+og:url tags, the sitemap) but is **not yet registered**. Buy it, connect it to
+Cloudflare, and point it at this Worker before launch. Until then the site is
+reachable only on its `workers.dev` URL, and the canonical tags point nowhere.
+
+**Pre-launch requirement: verify the Resend sender domain.**
+`src/pages/api/contact.ts` sends `from: 'idowuseyi.dev <noreply@cerfic.com>'`.
+The sender domain is deliberately `cerfic.com`, not the site's own domain:
+cerfic.com is already registered and already used for mail, so it has sending
+history, whereas a freshly-registered domain's first messages are more likely
+to be filtered. **`cerfic.com` must be added and verified as a sending domain
+in the Resend account** (SPF/DKIM set and confirmed). If the site goes live
+with both secrets set but the domain unverified, Resend returns 403 on every
+send, every submission fails, and the site looks correctly configured.
 
 **Pre-launch requirement: edge rate limiting on `/api/contact`.** The only
 abuse control in the Worker today is a honeypot field, which a scripted

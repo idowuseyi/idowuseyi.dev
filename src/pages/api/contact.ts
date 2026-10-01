@@ -26,7 +26,12 @@ async function deliver(submission: ContactSubmission, env: Env): Promise<Respons
       'content-type': 'application/json',
     },
     body: JSON.stringify({
-      from: 'idowuseyi.dev <noreply@idowuseyi.dev>',
+      // Sent from cerfic.com, an established domain with existing sending
+      // reputation, rather than from idowuseyi.dev. A brand-new domain's
+      // first messages are more likely to be filtered as spam, and the
+      // sender domain does not need to match the site's domain. reply_to
+      // below is the submitter, so replies still go to the right place.
+      from: 'idowuseyi.dev <noreply@cerfic.com>',
       to: [env.CONTACT_TO_EMAIL],
       reply_to: email,
       subject: `[${intent}] ${name}${company ? ` — ${company}` : ''}`,
