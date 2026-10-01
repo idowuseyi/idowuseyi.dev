@@ -12,7 +12,7 @@ export const profile = {
   ],
   proofMetrics: ['1k+ docs indexed', '10k+ daily users', '99.9% reliability'],
   credentials: ['2× HNG Finalist', 'ALX Certified Backend Engineer'],
-  email: 'dev@cerfic.com',
+  email: 'hello@idowuseyi.dev',
   cvPath: '/resume.pdf',
   github: 'https://github.com/idowuseyi',
   linkedin: 'https://www.linkedin.com/in/oluwaseyi-idowu-sunday',
