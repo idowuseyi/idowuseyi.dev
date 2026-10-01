@@ -1,14 +1,12 @@
 /**
- * Cal.com booking link, e.g. "idowuseyi/20min".
+ * Cal.com booking link, as "<user>/<event-slug>".
  *
- * Deliberately empty: as of this task, `cal.com/idowuseyi` and
- * `cal.com/idowuseyi/20min` both 404 — there is no Cal.com account yet.
- * `BookCall.astro` only renders the booking dialog and intercepts
- * `[data-cta="book"]` clicks when this is non-empty; while it's empty, the
- * anchor's own `href="#contact"` takes over and visitors land on the
- * working contact form instead of a 404 inside a modal.
+ * `BookCall.astro` renders the booking dialog and intercepts
+ * `[data-cta="book"]` clicks only when this is non-empty. While it is empty,
+ * each anchor's own `href="#contact"` takes over and visitors land on the
+ * working contact form instead of a 404 inside a modal — so booking degrades
+ * to the form rather than breaking.
  *
- * To activate booking once the Cal.com account exists, set this to the real
- * slug (e.g. 'idowuseyi/20min'). No other change is required.
+ * Verified live 2026-10-01: https://cal.com/oluwaseyi-idowu/tech-sync-onboarding
  */
-export const CAL_LINK = '';
+export const CAL_LINK = 'oluwaseyi-idowu/tech-sync-onboarding';
