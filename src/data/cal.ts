@@ -7,6 +7,6 @@
  * working contact form instead of a 404 inside a modal — so booking degrades
  * to the form rather than breaking.
  *
- * Verified live 2026-10-01: https://cal.com/oluwaseyi-idowu/tech-sync-onboarding
+ * Verified live 2026-10-01: https://cal.com/oluwaseyi-idowu/intro-call
  */
-export const CAL_LINK = 'oluwaseyi-idowu/tech-sync-onboarding';
+export const CAL_LINK = 'oluwaseyi-idowu/intro-call';
