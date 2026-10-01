@@ -32,6 +32,20 @@ Never commit real values for these; `wrangler secret put` prompts for the
 value interactively and stores it only in the Cloudflare account's secret
 store.
 
+**Pre-launch requirement: edge rate limiting on `/api/contact`.** The only
+abuse control in the Worker today is a honeypot field, which a scripted
+attacker bypasses trivially. `/api/contact` is a public, unauthenticated POST
+endpoint that triggers outbound email on every valid submission, so without
+a rate limit it is exposed to inbox spam and to exhausting the Resend
+account's sending quota. Before the site goes live, configure a Cloudflare
+WAF rate-limiting rule on `/api/contact` (Security > WAF > Rate limiting
+rules in the dashboard, or the equivalent `wrangler`/Terraform resource).
+This control belongs at the edge rather than in the Worker: an in-Worker
+in-memory limiter doesn't work across isolates, and a KV- or
+Turnstile-backed limiter needs remote provisioning that isn't available in
+this environment. Edge rate limiting also blocks abuse before a Worker
+invocation is ever billed, which an in-Worker check cannot do.
+
 Call booking (`src/components/BookCall.astro`) is feature-flagged on
 `CAL_LINK` in `src/data/cal.ts`, currently `''` because the Cal.com account
 doesn't exist yet. While it's empty, the "Book a 20-min call" CTA falls

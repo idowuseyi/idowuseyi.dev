@@ -3,6 +3,19 @@ import { parseContactSubmission, type ContactSubmission } from '../../lib/contac
 
 export const prerender = false;
 
+// A native (no-JS) HTML form POST sends `Accept: text/html,...` because the
+// browser is navigating; the enhanced `fetch()` path in ContactForm.astro
+// doesn't set that header. Used to decide between a body response (for the
+// fetch path, which reads the response itself) and a redirect (for a plain
+// navigation, which needs somewhere to land instead of a bare status page).
+function wantsHtml(request: Request): boolean {
+  return (request.headers.get('accept') ?? '').includes('text/html');
+}
+
+function seeOther(location: string): Response {
+  return new Response(null, { status: 303, headers: { Location: location } });
+}
+
 async function deliver(submission: ContactSubmission, env: Env): Promise<Response> {
   const { name, email, company, message, intent } = submission;
 
@@ -34,6 +47,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   const parsed = parseContactSubmission(form);
   if (!parsed.ok) {
+    if (wantsHtml(request)) return seeOther('/?error=1#contact');
     return new Response(parsed.error, { status: 400 });
   }
 
@@ -43,13 +57,19 @@ export const POST: APIRoute = async ({ request }) => {
   // unit tests) free of any dependency on that runtime.
   const { env } = await import('cloudflare:workers');
   if (!env.RESEND_API_KEY || !env.CONTACT_TO_EMAIL) {
-    return new Response('Contact delivery is not configured.', { status: 500 });
+    // The specific cause is only logged server-side — the response body
+    // must not disclose whether secrets are configured to an arbitrary caller.
+    console.error('Contact delivery is not configured: missing RESEND_API_KEY or CONTACT_TO_EMAIL.');
+    if (wantsHtml(request)) return seeOther('/?error=1#contact');
+    return new Response('Could not send your message. Please email me instead.', { status: 500 });
   }
 
   const response = await deliver(parsed.value, env);
   if (!response.ok) {
+    if (wantsHtml(request)) return seeOther('/?error=1#contact');
     return new Response('Could not deliver the message.', { status: 502 });
   }
 
+  if (wantsHtml(request)) return seeOther('/?sent=1#contact');
   return new Response(null, { status: 204 });
 };
