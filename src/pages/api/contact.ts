@@ -26,12 +26,12 @@ async function deliver(submission: ContactSubmission, env: Env): Promise<Respons
       'content-type': 'application/json',
     },
     body: JSON.stringify({
-      // Sent from cerfic.com, an established domain with existing sending
-      // reputation, rather than from idowuseyi.dev. A brand-new domain's
-      // first messages are more likely to be filtered as spam, and the
-      // sender domain does not need to match the site's domain. reply_to
-      // below is the submitter, so replies still go to the right place.
-      from: 'idowuseyi.dev <noreply@cerfic.com>',
+      // Requires idowuseyi.dev to be a VERIFIED SENDING domain in Resend
+      // (SPF + DKIM in Cloudflare DNS, set to DNS-only). Resend's inbound
+      // "receiving" feature is separate and does not satisfy this.
+      // Unverified, every send returns 403. reply_to below is the submitter,
+      // so replies route to them rather than to this address.
+      from: 'idowuseyi.dev <noreply@idowuseyi.dev>',
       to: [env.CONTACT_TO_EMAIL],
       reply_to: email,
       subject: `[${intent}] ${name}${company ? ` — ${company}` : ''}`,

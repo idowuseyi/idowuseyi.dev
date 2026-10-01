@@ -38,15 +38,19 @@ og:url tags, the sitemap) but is **not yet registered**. Buy it, connect it to
 Cloudflare, and point it at this Worker before launch. Until then the site is
 reachable only on its `workers.dev` URL, and the canonical tags point nowhere.
 
-**Pre-launch requirement: verify the Resend sender domain.**
-`src/pages/api/contact.ts` sends `from: 'idowuseyi.dev <noreply@cerfic.com>'`.
-The sender domain is deliberately `cerfic.com`, not the site's own domain:
-cerfic.com is already registered and already used for mail, so it has sending
-history, whereas a freshly-registered domain's first messages are more likely
-to be filtered. **`cerfic.com` must be added and verified as a sending domain
-in the Resend account** (SPF/DKIM set and confirmed). If the site goes live
-with both secrets set but the domain unverified, Resend returns 403 on every
-send, every submission fails, and the site looks correctly configured.
+**Pre-launch requirement: verify the Resend SENDING domain.**
+`src/pages/api/contact.ts` sends `from: 'idowuseyi.dev <noreply@idowuseyi.dev>'`,
+so `idowuseyi.dev` must appear under **Domains** in Resend with status
+**Verified** — SPF and DKIM records added to Cloudflare DNS and confirmed.
+
+Resend's inbound **receiving** feature is a different thing and does **not**
+satisfy this. Receiving lets Resend accept mail *at* the domain; sending
+verification proves ownership so Resend may send *as* the domain. The contact
+form only sends.
+
+Set those DNS records to **DNS only (grey cloud)** in Cloudflare — proxying
+breaks mail records. Unverified, Resend returns 403 on every send, every
+submission fails, and the site looks correctly configured.
 
 **Pre-launch requirement: edge rate limiting on `/api/contact`.** The only
 abuse control in the Worker today is a honeypot field, which a scripted
