@@ -1,0 +1,84 @@
+---
+import { CAL_LINK } from '../data/cal';
+
+const bookingEnabled = CAL_LINK.length > 0;
+---
+{
+  bookingEnabled && (
+    <dialog class="book" id="book-dialog" aria-label="Book a 20 minute call">
+      <button class="book__close" type="button" aria-label="Close">×</button>
+      <div class="book__slot" data-cal-link={CAL_LINK}></div>
+    </dialog>
+  )
+}
+
+<style>
+  .book {
+    width: min(100% - 2rem, 900px);
+    max-height: 90vh;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    overflow: hidden;
+  }
+  /* Derived from --base rather than a hardcoded black so the overlay tracks
+     the token if the palette ever changes. */
+  .book::backdrop {
+    background: color-mix(in srgb, var(--base) 80%, transparent);
+  }
+  .book__close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.75rem;
+    background: transparent;
+    border: 0;
+    color: var(--muted);
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .book__slot {
+    min-height: 70vh;
+  }
+</style>
+
+<script>
+  // Only ever finds the dialog when CAL_LINK is non-empty (BookCall.astro
+  // renders no <dialog> at all otherwise), so this never attaches a
+  // listener to [data-cta="book"] while booking is unconfigured — those
+  // anchors fall through to their own href="#contact" and the visitor
+  // scrolls to the working form instead.
+  const dialog = document.getElementById('book-dialog') as HTMLDialogElement | null;
+  if (dialog) {
+    let loaded = false;
+
+    // The Cal embed is only fetched once the visitor actually asks to book,
+    // so it costs nothing against the homepage JavaScript budget.
+    function loadEmbed() {
+      if (loaded) return;
+      loaded = true;
+      const slot = dialog!.querySelector('.book__slot') as HTMLElement;
+      const frame = document.createElement('iframe');
+      frame.src = `https://cal.com/${slot.dataset.calLink}?embed=true&theme=dark`;
+      frame.title = 'Book a 20 minute call';
+      frame.loading = 'lazy';
+      frame.style.cssText = 'width:100%;height:70vh;border:0;';
+      slot.appendChild(frame);
+    }
+
+    document.querySelectorAll('[data-cta="book"]').forEach((trigger) => {
+      trigger.addEventListener('click', (event) => {
+        event.preventDefault();
+        loadEmbed();
+        dialog.showModal();
+      });
+    });
+
+    dialog.querySelector('.book__close')?.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+  }
+</script>

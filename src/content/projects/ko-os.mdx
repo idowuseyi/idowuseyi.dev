@@ -1,0 +1,37 @@
+---
+title: KO OS — provider-agnostic LLM platform
+kicker: AI Systems
+role: CTO & Engineer — KO Content Studios
+order: 1
+blurb: An AI content platform whose model layer is provider-agnostic and whose every LLM response is validated against a typed schema before it reaches the application.
+tags: ['TypeScript', 'Next.js', 'Vercel AI SDK', 'Drizzle', 'PostgreSQL', 'Zod']
+metrics:
+  - { value: '6', label: 'LLM providers routed' }
+  - { value: '21', label: 'Unit test suites' }
+  - { value: 'Typed', label: 'Structured output' }
+diagram: ko-os
+evidence: linked
+repoUrl: 'https://github.com/Kocontentstudios/koos'
+liveUrl: 'https://app.kocontentstudios.com'
+---
+
+import Diagram from '../../components/Diagram.astro';
+
+The hard problem was not calling a model. It was making model choice a
+configuration concern rather than a code concern, and then refusing to let
+unvalidated model output into the application.
+
+<Diagram name="ko-os" caption="The src/lib/ai layer: provider config selects a model, extracted prompts feed a provider-agnostic client, and every response is validated against a Zod schema before the application sees it." />
+
+**Provider-agnostic by construction.** `provider-config.ts` resolves which model
+answers a request; `provider.ts` wraps the Vercel AI SDK so the call site never
+names a vendor. Swapping Google for Anthropic is a config change, not a refactor.
+
+**Prompts are modules, not string literals.** `prompts/strategy.ts`,
+`prompts/calendar.ts` and `prompts/chat.ts` sit apart from the code that calls
+them, so a prompt change is reviewable in a diff like any other change.
+
+**Structured output is enforced, not hoped for.** Content strategy and calendar
+responses are parsed through Zod schemas that have their own test suites. A
+malformed generation fails at the boundary instead of propagating a plausible
+but wrong object into the database.

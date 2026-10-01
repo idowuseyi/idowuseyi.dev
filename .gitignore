@@ -4,3 +4,16 @@
 !.dev.vars.example
 .env*
 !.env.example
+
+# sdd scratch
+.superpowers
+
+# build output
+dist
+.astro
+node_modules
+
+# lighthouse-ci artifacts
+.lighthouseci
+# WSL/Chrome interop can create dirs literally named with Windows paths
+C:*

@@ -1,0 +1,73 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import Hero from '../components/Hero.astro';
+import ProofStrip from '../components/ProofStrip.astro';
+import CaseStudy from '../components/CaseStudy.astro';
+import Cta from '../components/Cta.astro';
+import Timeline from '../components/Timeline.astro';
+import Contact from '../components/Contact.astro';
+import BookCall from '../components/BookCall.astro';
+import { profile } from '../data/profile';
+
+const projects = (await getCollection('projects')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+---
+<BaseLayout
+  title="Oluwaseyi Idowu — AI Systems Engineer"
+  description="Rust and TypeScript backends for LLM systems — multi-provider routing, retrieval-augmented search and schema-validated structured output."
+>
+  <SiteHeader />
+
+  <main id="hero">
+    <Hero />
+
+    <div class="wrap"><ProofStrip /></div>
+
+    <section class="work" id="work">
+      <div class="wrap">
+        <h2 class="work__title">Selected work</h2>
+        <p class="work__lede">Three systems, each with its evidence attached.</p>
+        {projects.map((project) => <CaseStudy project={project} />)}
+      </div>
+    </section>
+
+    <section class="cta-break" id="cta-break">
+      <div class="wrap cta-break__inner">
+        <p class="cta-break__line">Hiring for AI infrastructure or backend systems?</p>
+        <Cta placement="break" align="center" />
+      </div>
+    </section>
+
+    <Timeline />
+    <Contact />
+  </main>
+
+  <footer class="footer">
+    <div class="wrap mono">© 2026 {profile.name}</div>
+  </footer>
+
+  <BookCall />
+</BaseLayout>
+
+<style>
+  .work { padding-block: var(--space-xl); }
+  .work__title { font-size: var(--step-2); font-weight: 600; letter-spacing: -0.02em; }
+  .work__lede { color: var(--muted); margin-top: var(--space-s); }
+
+  .cta-break {
+    padding-block: var(--space-xl);
+    border-block: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .cta-break__inner { display: grid; gap: var(--space-l); justify-items: center; text-align: center; }
+  .cta-break__line { font-size: var(--step-1); }
+
+  .footer {
+    padding-block: var(--space-l);
+    color: var(--muted);
+    font-size: var(--step--1);
+  }
+</style>

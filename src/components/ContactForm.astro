@@ -1,0 +1,140 @@
+---
+import { profile } from '../data/profile';
+---
+<form class="contact" method="post" action="/api/contact">
+  <div class="contact__grid">
+    <label class="field">
+      <span class="field__label mono">Name</span>
+      <input class="field__input" name="name" required autocomplete="name" />
+    </label>
+    <label class="field">
+      <span class="field__label mono">Email</span>
+      <input class="field__input" name="email" type="email" required autocomplete="email" />
+    </label>
+    <label class="field">
+      <span class="field__label mono">Company</span>
+      <input class="field__input" name="company" autocomplete="organization" />
+    </label>
+    <label class="field">
+      <span class="field__label mono">Reason</span>
+      <select class="field__input" name="intent">
+        <option value="hiring">Hiring for a role</option>
+        <option value="project">Starting a project</option>
+      </select>
+    </label>
+  </div>
+
+  <label class="field">
+    <span class="field__label mono">Message</span>
+    <textarea class="field__input" name="message" rows="5" required maxlength="5000"></textarea>
+  </label>
+
+  <input class="contact__trap" name="_hp" tabindex="-1" autocomplete="off" aria-hidden="true" readonly />
+
+  <div class="contact__actions">
+    <button class="contact__submit" type="submit">Send message</button>
+    <p class="contact__status mono" role="status" aria-live="polite"></p>
+  </div>
+
+  <p class="contact__fallback mono">
+    Or email <a href={`mailto:${profile.email}`}>{profile.email}</a>
+  </p>
+</form>
+
+<style>
+  .contact {
+    display: grid;
+    gap: var(--space-m);
+    max-width: 60ch;
+  }
+  .contact__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-m);
+  }
+  .field {
+    display: grid;
+    gap: 0.35rem;
+  }
+  .field__label {
+    color: var(--muted);
+    font-size: var(--step--1);
+  }
+  .field__input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font: inherit;
+    padding: 0.6rem 0.7rem;
+  }
+  .field__input:focus-visible {
+    border-color: var(--focus);
+  }
+  .contact__trap {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+  }
+  .contact__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-m);
+  }
+  .contact__submit {
+    background: var(--accent);
+    color: var(--base);
+    border: 0;
+    border-radius: var(--radius);
+    font: inherit;
+    font-weight: 500;
+    padding: 0.7rem 1.3rem;
+    cursor: pointer;
+  }
+  .contact__submit[disabled] {
+    opacity: 0.6;
+    cursor: progress;
+  }
+  .contact__status {
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+  .contact__fallback {
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+</style>
+
+<script>
+  const form = document.querySelector('.contact') as HTMLFormElement | null;
+  if (form) {
+    const status = form.querySelector('.contact__status') as HTMLElement;
+    const submit = form.querySelector('.contact__submit') as HTMLButtonElement;
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      submit.disabled = true;
+      status.textContent = 'Sending…';
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { Accept: 'application/json' },
+          redirect: 'error',
+        });
+        if (response.ok) {
+          form.reset();
+          status.textContent = 'Sent. I reply within two working days.';
+        } else {
+          status.textContent = (await response.text()) || 'Something went wrong.';
+        }
+      } catch {
+        status.textContent = 'Network error — please email me instead.';
+      } finally {
+        submit.disabled = false;
+      }
+    });
+  }
+</script>

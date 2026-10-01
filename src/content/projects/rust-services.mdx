@@ -1,0 +1,26 @@
+---
+title: Rust authentication & payment service
+kicker: Backend Systems
+role: Software Engineer
+order: 3
+blurb: Google OAuth and Paystack payment handling implemented in Rust, where a replayed webhook means a double charge.
+tags: ['Rust', 'OAuth 2.0', 'Paystack', 'Webhooks', 'PostgreSQL']
+metrics:
+  - { value: 'Rust', label: 'End to end' }
+  - { value: 'OAuth', label: 'Google sign-in' }
+  - { value: 'Verified', label: 'Payment webhooks' }
+evidence: linked
+repoUrl: 'https://github.com/idowuseyi/google-auth-paystack-plus'
+---
+
+Payment webhooks are where correctness stops being negotiable. A replayed
+message is a double charge, and a provider that retries on timeout will send
+one eventually.
+
+This service handles the Google OAuth exchange and Paystack payment flow in
+Rust, verifying webhook authenticity before any handler runs and treating
+delivery as at-least-once rather than exactly-once.
+
+Rust is the deliberate choice here rather than the interesting one: the
+compiler refusing to let an unhandled error path through is worth more in a
+payment handler than anywhere else in a system.

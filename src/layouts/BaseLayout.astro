@@ -1,0 +1,52 @@
+---
+import '@fontsource-variable/geist';
+import '@fontsource-variable/geist-mono';
+import '../styles/tokens.css';
+
+interface Props {
+  title: string;
+  description: string;
+  canonicalPath?: string;
+  noindex?: boolean;
+}
+
+const { title, description, canonicalPath = '/', noindex = false } = Astro.props;
+const canonical = new URL(canonicalPath, Astro.site ?? 'https://idowuseyi.dev');
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical.href} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical.href} />
+    <meta name="theme-color" content="#08090A" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <noscript><style>.reveal { opacity: 1; transform: none; }</style></noscript>
+  </head>
+  <body>
+    <slot />
+    <script>
+      const nodes = document.querySelectorAll('.reveal');
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduced || !('IntersectionObserver' in window)) {
+        nodes.forEach((n) => n.classList.add('is-visible'));
+      } else {
+        const io = new IntersectionObserver((entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            entry.target.classList.add('is-visible');
+            io.unobserve(entry.target);
+          }
+        }, { rootMargin: '0px 0px -10% 0px' });
+        nodes.forEach((n) => io.observe(n));
+      }
+    </script>
+  </body>
+</html>

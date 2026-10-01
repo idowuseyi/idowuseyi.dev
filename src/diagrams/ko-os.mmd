@@ -1,0 +1,18 @@
+flowchart LR
+  REQ[Feature request] --> PC[provider-config.ts]
+  PC -->|selected model| CL[provider.ts<br/>Vercel AI SDK client]
+  PR[prompts/strategy.ts<br/>prompts/calendar.ts<br/>prompts/chat.ts] --> CL
+  CL --> G[Google]
+  CL --> O[OpenAI]
+  CL --> A[Anthropic]
+  CL --> Z[Z.ai]
+  CL --> B[AWS Bedrock]
+  CL --> OC[OpenAI-compatible endpoint]
+  G --> SV
+  O --> SV
+  A --> SV
+  Z --> SV
+  B --> SV
+  OC --> SV
+  SV[strategy-schema.ts<br/>calendar-schema.ts<br/>Zod validation] -->|typed, or rejected| APP[Application]
+  SV -.covered by.-> T[(21 unit test suites)]
