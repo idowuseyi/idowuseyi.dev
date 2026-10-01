@@ -34,7 +34,7 @@ const target = process.argv[2] ?? 'src/diagrams/ko-os.svg';
 
 const DIAGRAM_TITLE =
   'KO OS provider-agnostic LLM pipeline: provider config selects a model, ' +
-  'extracted prompts feed a provider-agnostic client across four providers, ' +
+  'extracted prompts feed a provider-agnostic client across six providers, ' +
   'and Zod schema validation gates the typed result before it reaches the application.';
 
 // Each pair is matched as an exact, atomic substring of one mmdc-emitted CSS

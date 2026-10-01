@@ -41,7 +41,7 @@ export const POST: APIRoute = async ({ request }) => {
   // Honeypot: real visitors never fill a hidden field. Accept silently so
   // bots can't distinguish rejection from success, and return before ever
   // touching the Workers runtime env or the Resend call below.
-  if (typeof form.website === 'string' && form.website.trim() !== '') {
+  if (typeof form._hp === 'string' && form._hp.trim() !== '') {
     return new Response(null, { status: 202 });
   }
 

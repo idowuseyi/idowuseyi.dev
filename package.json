@@ -1,10 +1,7 @@
 {
   "name": "idowuseyi-dev",
   "version": "1.0.0",
-  "description": "",
-  "directories": {
-    "doc": "docs"
-  },
+  "description": "Oluwaseyi Idowu's recruiter-facing portfolio — Astro, static output, deployed to Cloudflare.",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
@@ -14,10 +11,10 @@
     "diagrams": "npx --yes @mermaid-js/mermaid-cli@^12.0.0 -i src/diagrams/ko-os.mmd -o src/diagrams/ko-os.svg -b transparent -t dark && node scripts/theme-diagram.mjs"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Oluwaseyi Idowu",
+  "license": "UNLICENSED",
   "type": "module",
-  "private": "true",
+  "private": true,
   "dependencies": {
     "@astrojs/cloudflare": "^14.3.3",
     "@astrojs/mdx": "^8.0.2",
@@ -28,6 +25,8 @@
   },
   "devDependencies": {
     "@lhci/cli": "^0.15.1",
+    "@types/js-yaml": "^4.0.9",
+    "js-yaml": "^5.4.2",
     "typescript": "^7.0.2",
     "vitest": "^5.0.2",
     "wrangler": "^4.143.1"

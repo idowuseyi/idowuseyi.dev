@@ -7,9 +7,10 @@ interface Props {
   title: string;
   description: string;
   canonicalPath?: string;
+  noindex?: boolean;
 }
 
-const { title, description, canonicalPath = '/' } = Astro.props;
+const { title, description, canonicalPath = '/', noindex = false } = Astro.props;
 const canonical = new URL(canonicalPath, Astro.site ?? 'https://idowuseyi.dev');
 ---
 <!doctype html>
@@ -20,12 +21,14 @@ const canonical = new URL(canonicalPath, Astro.site ?? 'https://idowuseyi.dev');
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical.href} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical.href} />
-    <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content="#08090A" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <noscript><style>.reveal { opacity: 1; transform: none; }</style></noscript>
   </head>
   <body>
     <slot />

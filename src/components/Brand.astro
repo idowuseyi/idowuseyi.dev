@@ -1,13 +1,13 @@
 ---
-const domain = 'idowuseyi.dev';
+import { profile } from '../data/profile';
 ---
-<a class="brand" href="/" aria-label={`${domain} home`}>{domain}</a>
+<a class="brand" href="/" aria-label={`${profile.domain} home`}>{profile.domain}</a>
 
 <style>
   .brand {
-    font-family: var(--font-mono, monospace);
+    font-family: var(--font-mono);
     font-size: 0.9rem;
-    color: var(--text, #EDEEF0);
+    color: var(--text);
     text-decoration: none;
     letter-spacing: -0.01em;
   }

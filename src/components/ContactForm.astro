@@ -29,7 +29,7 @@ import { profile } from '../data/profile';
     <textarea class="field__input" name="message" rows="5" required maxlength="5000"></textarea>
   </label>
 
-  <input class="contact__trap" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+  <input class="contact__trap" name="_hp" tabindex="-1" autocomplete="off" aria-hidden="true" readonly />
 
   <div class="contact__actions">
     <button class="contact__submit" type="submit">Send message</button>
@@ -121,6 +121,8 @@ import { profile } from '../data/profile';
         const response = await fetch(form.action, {
           method: 'POST',
           body: new FormData(form),
+          headers: { Accept: 'application/json' },
+          redirect: 'error',
         });
         if (response.ok) {
           form.reset();

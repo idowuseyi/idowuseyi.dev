@@ -1,7 +1,7 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
-import yaml from 'js-yaml';
+import { load as loadYaml } from 'js-yaml';
 import { beforeAll, describe, expect, test } from 'vitest';
 import Index from '../src/pages/index.astro';
 import { projectSchema } from '../src/schemas/project';
@@ -22,7 +22,7 @@ function readProjectFrontmatter(filename: string): unknown {
   const raw = readFileSync(path.join(projectsDir, filename), 'utf8');
   const match = raw.match(/^---\n([\s\S]*?)\n---/);
   if (!match) throw new Error(`${filename} has no frontmatter block.`);
-  return yaml.load(match[1]);
+  return loadYaml(match[1]);
 }
 
 beforeAll(async () => {
@@ -60,5 +60,28 @@ describe('homepage', () => {
 
   test('ships no hero video', () => {
     expect(html).not.toContain('.mp4');
+    expect(html).not.toContain('<video');
+  });
+
+  test('the built homepage actually renders the three case studies', () => {
+    const distIndex = path.resolve(__dirname, '../dist/client/index.html');
+    if (!existsSync(distIndex)) {
+      console.warn('Skipping: dist/client/index.html not found — run `npm run build` first.');
+      return;
+    }
+    const builtHtml = readFileSync(distIndex, 'utf8');
+
+    const caseOccurrences = builtHtml.match(/class="case reveal"/g) ?? [];
+    expect(caseOccurrences.length).toBe(3);
+
+    const files = readdirSync(projectsDir).filter((f) => f.endsWith('.mdx'));
+    for (const file of files) {
+      const frontmatter = readProjectFrontmatter(file) as { title: string };
+      // Astro escapes `&` to `&amp;` when rendering text content, so compare
+      // against the HTML-escaped form of the title rather than the raw
+      // frontmatter string.
+      const escapedTitle = frontmatter.title.replace(/&/g, '&amp;');
+      expect(builtHtml).toContain(escapedTitle);
+    }
   });
 });

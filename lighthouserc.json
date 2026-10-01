@@ -2,6 +2,7 @@
   "ci": {
     "collect": {
       "staticDistDir": "./dist/client",
+      "url": ["/index.html"],
       "numberOfRuns": 3,
       "settings": {
         "preset": "desktop",

@@ -14,6 +14,8 @@ export default defineConfig({
   // pattern here and skip the adapter only under Vitest. `npm run dev/build/
   // preview/deploy` are unaffected.
   adapter: process.env.VITEST ? undefined : cloudflare(),
-  integrations: [mdx(), sitemap()],
-  prefetch: { prefetchAll: true, defaultStrategy: 'viewport' },
+  integrations: [
+    mdx(),
+    sitemap({ filter: (page) => !/\/(thanks|contact-error)\/?$/.test(page) }),
+  ],
 });

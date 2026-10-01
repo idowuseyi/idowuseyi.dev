@@ -110,7 +110,7 @@ describe('POST /api/contact honeypot', () => {
   test('accepts silently without attempting delivery when the trap field is filled', async () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch');
 
-    const request = formRequest({ ...valid, website: 'http://spam.example' });
+    const request = formRequest({ ...valid, _hp: 'http://spam.example' });
     const response = await POST({ request } as Parameters<typeof POST>[0]);
 
     expect(response.status).toBe(202);
@@ -123,7 +123,7 @@ describe('POST /api/contact honeypot', () => {
   });
 
   test('still runs normal validation when the trap field is empty', async () => {
-    const request = formRequest({ ...valid, website: '', email: 'not-an-email' });
+    const request = formRequest({ ...valid, _hp: '', email: 'not-an-email' });
     const response = await POST({ request } as Parameters<typeof POST>[0]);
 
     expect(response.status).toBe(400);
@@ -145,7 +145,7 @@ describe('POST /api/contact delivery', () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch');
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    const request = formRequest({ ...valid, website: '' });
+    const request = formRequest({ ...valid, _hp: '' });
     const response = await POST({ request } as Parameters<typeof POST>[0]);
 
     expect(response.status).toBe(500);
@@ -161,7 +161,7 @@ describe('POST /api/contact delivery', () => {
   test('returns 502 when Resend responds with a non-ok status', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('bad request', { status: 422 }));
 
-    const request = formRequest({ ...valid, website: '' });
+    const request = formRequest({ ...valid, _hp: '' });
     const response = await POST({ request } as Parameters<typeof POST>[0]);
 
     expect(response.status).toBe(502);
@@ -170,7 +170,7 @@ describe('POST /api/contact delivery', () => {
   test('returns 204 when Resend accepts the message (fetch/non-HTML request)', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(null, { status: 200 }));
 
-    const request = formRequest({ ...valid, website: '' }, { accept: '*/*' });
+    const request = formRequest({ ...valid, _hp: '' }, { accept: '*/*' });
     const response = await POST({ request } as Parameters<typeof POST>[0]);
 
     expect(response.status).toBe(204);
@@ -181,7 +181,7 @@ describe('POST /api/contact delivery', () => {
       .spyOn(globalThis, 'fetch')
       .mockResolvedValue(new Response(null, { status: 200 }));
 
-    const request = formRequest({ ...valid, website: '' }, { accept: '*/*' });
+    const request = formRequest({ ...valid, _hp: '' }, { accept: '*/*' });
     await POST({ request } as Parameters<typeof POST>[0]);
 
     expect(fetchSpy).toHaveBeenCalledTimes(1);
@@ -204,7 +204,7 @@ describe('POST /api/contact delivery', () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(null, { status: 200 }));
 
     const request = formRequest(
-      { ...valid, website: '' },
+      { ...valid, _hp: '' },
       { accept: 'text/html,application/xhtml+xml' },
     );
     const response = await POST({ request } as Parameters<typeof POST>[0]);
@@ -215,7 +215,7 @@ describe('POST /api/contact delivery', () => {
 
   test('redirects a no-JS (HTML-accepting) request to /contact-error on validation failure', async () => {
     const request = formRequest(
-      { ...valid, website: '', email: 'not-an-email' },
+      { ...valid, _hp: '', email: 'not-an-email' },
       { accept: 'text/html,application/xhtml+xml' },
     );
     const response = await POST({ request } as Parameters<typeof POST>[0]);
@@ -229,7 +229,7 @@ describe('POST /api/contact delivery', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const request = formRequest(
-      { ...valid, website: '' },
+      { ...valid, _hp: '' },
       { accept: 'text/html,application/xhtml+xml' },
     );
     const response = await POST({ request } as Parameters<typeof POST>[0]);

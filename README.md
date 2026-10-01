@@ -32,6 +32,14 @@ Never commit real values for these; `wrangler secret put` prompts for the
 value interactively and stores it only in the Cloudflare account's secret
 store.
 
+**Pre-launch requirement: verify the Resend sender domain.** `src/pages/api/contact.ts`
+sends `from: 'idowuseyi.dev <noreply@idowuseyi.dev>'`, which requires
+`idowuseyi.dev` to be added and verified as a sending domain in the Resend
+account (SPF/DKIM records set and confirmed). If the site goes live with both
+secrets set but the domain unverified, Resend returns 403 on every send, every
+contact-form submission silently fails, and the site looks correctly
+configured. Verify this in the Resend dashboard before launch.
+
 **Pre-launch requirement: edge rate limiting on `/api/contact`.** The only
 abuse control in the Worker today is a honeypot field, which a scripted
 attacker bypasses trivially. `/api/contact` is a public, unauthenticated POST
