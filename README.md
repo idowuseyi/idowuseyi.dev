@@ -57,8 +57,9 @@ is the only change needed to activate the booking dialog.
 
 Diagrams under `src/diagrams/` (e.g. `ko-os.svg`) are authored as Mermaid
 source (`.mmd`) and compiled to a themed, static SVG that's committed to the
-repo. `Diagram.astro` just reads and inlines that committed SVG at build
-time — regenerating it is **not** part of the normal install or build.
+repo. `Diagram.astro` inlines that committed SVG at build time via Vite's
+`import.meta.glob` (so no filesystem path is resolved at render time) —
+regenerating the SVG itself is **not** part of the normal install or build.
 
 ```
 npm run diagrams
@@ -86,31 +87,13 @@ has been left out of CI rather than added as a check that always "passes"
 without verifying anything. **Fix:** align the TypeScript version with one
 `astro check` supports, then wire `astro check` (not bare `tsc`) into CI.
 
-**`Diagram.astro` fails inside the real Cloudflare build pipeline.**
-`Diagram.astro` resolves the SVG it inlines with
-`fileURLToPath(new URL(`../diagrams/${name}.svg`, import.meta.url))`. That
-resolution works under Vitest/Node (every existing test using the component
-passes) and was never exercised against a real `astro build` before Task 8,
-because no page imported `CaseStudy` (and therefore `Diagram`) until the
-homepage was assembled. Once `index.astro` renders the case studies,
-`npm run build` fails while prerendering `/`:
-
-```
-Error: Failed to prerender https://idowuseyi.dev/: Invalid URL string.
-```
-
-Root cause, confirmed with a temporary debug probe inside the Cloudflare
-adapter's prerender environment: `import.meta.url` is `undefined` in that
-environment (it runs component frontmatter inside workerd via the adapter's
-own preview/prerender server, not plain Node), so
-`new URL(relative, undefined)` throws before `readFileSync` ever runs. The
-failure reproduces with a trivial placeholder SVG and with `<Diagram>` used
-directly on a page with no MDX/content-collection involvement at all, so it
-is specific to that path-resolution strategy, not to the diagram's content
-or to MDX. This blocks `npm run build`, and therefore blocks the link check
-and Lighthouse budget steps in CI, until it's fixed. **Fix (not applied
-here — `Diagram.astro` is out of scope for the task that found this):**
-resolve the SVG without depending on `import.meta.url` inside that
-environment — for example, import each diagram's SVG as a Vite `?raw`
-asset at the top of the module instead of reading it from disk by a
-runtime-computed path.
+**`linkinator` skips `idowuseyi.dev` until the domain goes live.** The built
+output's canonical/og/sitemap links all point at `https://idowuseyi.dev/`,
+but the DNS cutover to that domain is a later plan item, so the domain isn't
+live yet and every such link would otherwise fail the CI link check for a
+reason that isn't a defect in the build. `.github/workflows/ci.yml` passes
+`idowuseyi.dev` to linkinator's `--skip` list (alongside `linkedin.com`,
+skipped for unrelated rate-limiting reasons) specifically to paper over this.
+**Fix at cutover:** remove `idowuseyi.dev` from that `--skip` list once the
+domain resolves, so the link check starts actually verifying those links
+again.

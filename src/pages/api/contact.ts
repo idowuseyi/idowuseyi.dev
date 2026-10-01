@@ -47,7 +47,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   const parsed = parseContactSubmission(form);
   if (!parsed.ok) {
-    if (wantsHtml(request)) return seeOther('/?error=1#contact');
+    if (wantsHtml(request)) return seeOther('/contact-error');
     return new Response(parsed.error, { status: 400 });
   }
 
@@ -60,16 +60,16 @@ export const POST: APIRoute = async ({ request }) => {
     // The specific cause is only logged server-side — the response body
     // must not disclose whether secrets are configured to an arbitrary caller.
     console.error('Contact delivery is not configured: missing RESEND_API_KEY or CONTACT_TO_EMAIL.');
-    if (wantsHtml(request)) return seeOther('/?error=1#contact');
+    if (wantsHtml(request)) return seeOther('/contact-error');
     return new Response('Could not send your message. Please email me instead.', { status: 500 });
   }
 
   const response = await deliver(parsed.value, env);
   if (!response.ok) {
-    if (wantsHtml(request)) return seeOther('/?error=1#contact');
+    if (wantsHtml(request)) return seeOther('/contact-error');
     return new Response('Could not deliver the message.', { status: 502 });
   }
 
-  if (wantsHtml(request)) return seeOther('/?sent=1#contact');
+  if (wantsHtml(request)) return seeOther('/thanks');
   return new Response(null, { status: 204 });
 };

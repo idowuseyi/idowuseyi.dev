@@ -19,7 +19,11 @@ jobs:
       - name: Build
         run: npm run build
       - name: Check every outbound link resolves
-        run: npx --yes linkinator ./dist/client --recurse --silent --skip "linkedin.com"
+        # idowuseyi.dev is skipped only until the DNS cutover makes it live
+        # (a later plan item) — until then the canonical/og/sitemap links to
+        # it are a known-good failure from linkinator's point of view, not a
+        # defect in this build.
+        run: npx --yes linkinator ./dist/client --recurse --silent --skip "linkedin.com,idowuseyi.dev"
       - name: Performance budget
         # ubuntu-latest already ships Chrome; @lhci/cli drives it directly, so
         # no browser install step is added here. --no-sandbox (set in

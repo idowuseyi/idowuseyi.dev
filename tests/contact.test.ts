@@ -200,7 +200,7 @@ describe('POST /api/contact delivery', () => {
     expect(payload.text).toContain(valid.message);
   });
 
-  test('redirects a no-JS (HTML-accepting) request to /?sent=1#contact on success', async () => {
+  test('redirects a no-JS (HTML-accepting) request to /thanks on success', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(null, { status: 200 }));
 
     const request = formRequest(
@@ -210,10 +210,10 @@ describe('POST /api/contact delivery', () => {
     const response = await POST({ request } as Parameters<typeof POST>[0]);
 
     expect(response.status).toBe(303);
-    expect(response.headers.get('Location')).toBe('/?sent=1#contact');
+    expect(response.headers.get('Location')).toBe('/thanks');
   });
 
-  test('redirects a no-JS (HTML-accepting) request to /?error=1#contact on validation failure', async () => {
+  test('redirects a no-JS (HTML-accepting) request to /contact-error on validation failure', async () => {
     const request = formRequest(
       { ...valid, website: '', email: 'not-an-email' },
       { accept: 'text/html,application/xhtml+xml' },
@@ -221,10 +221,10 @@ describe('POST /api/contact delivery', () => {
     const response = await POST({ request } as Parameters<typeof POST>[0]);
 
     expect(response.status).toBe(303);
-    expect(response.headers.get('Location')).toBe('/?error=1#contact');
+    expect(response.headers.get('Location')).toBe('/contact-error');
   });
 
-  test('redirects a no-JS (HTML-accepting) request to /?error=1#contact when secrets are missing', async () => {
+  test('redirects a no-JS (HTML-accepting) request to /contact-error when secrets are missing', async () => {
     mockEnv.RESEND_API_KEY = undefined;
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
@@ -235,6 +235,6 @@ describe('POST /api/contact delivery', () => {
     const response = await POST({ request } as Parameters<typeof POST>[0]);
 
     expect(response.status).toBe(303);
-    expect(response.headers.get('Location')).toBe('/?error=1#contact');
+    expect(response.headers.get('Location')).toBe('/contact-error');
   });
 });

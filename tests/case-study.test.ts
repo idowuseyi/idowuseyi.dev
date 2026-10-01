@@ -2,6 +2,7 @@ import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import type { CollectionEntry } from 'astro:content';
 import { describe, expect, test } from 'vitest';
 import CaseStudy from '../src/components/CaseStudy.astro';
+import Diagram from '../src/components/Diagram.astro';
 import MetricRow from '../src/components/MetricRow.astro';
 
 // `render(project)` inside CaseStudy.astro pulls its Content component from
@@ -125,5 +126,22 @@ describe('case study evidence branches', () => {
     for (const tag of ['Rust', 'Axum', 'PostgreSQL', 'Redis']) {
       expect(html).toMatch(new RegExp(`<li[^>]*>${tag}</li>`));
     }
+  });
+});
+
+describe('Diagram', () => {
+  // Pins Diagram.astro against regression: it must inline the SVG via
+  // `import.meta.glob` rather than reading it from disk through a path
+  // derived from `import.meta.url`, which is undefined inside
+  // @astrojs/cloudflare's prerender environment (see src/components/Diagram.astro).
+  // Vitest's Node environment can't reproduce that failure directly, but this
+  // at least proves the component renders the real, inlined SVG content.
+  test('renders the inlined SVG for a known diagram', async () => {
+    const container = await AstroContainer.create();
+    const html = await container.renderToString(Diagram, {
+      props: { name: 'ko-os', caption: 'test' },
+    });
+    expect(html).toContain('role="img"');
+    expect(html).toContain('<svg');
   });
 });

@@ -2,16 +2,6 @@
 import Cta from './Cta.astro';
 import ContactForm from './ContactForm.astro';
 import { profile } from '../data/profile';
-
-// /api/contact redirects a plain (no-JS) HTML form POST back here with
-// ?sent=1#contact or ?error=1#contact (see src/pages/api/contact.ts). This
-// reads that query string server-side so the banner below renders without
-// depending on any client-side script — the enhanced fetch() path in
-// ContactForm.astro already reports its own status inline and leaves these
-// params unset. The error message is a fixed string, never built from the
-// query string, so there is nothing here that echoes user input.
-const sent = Astro.url.searchParams.has('sent');
-const error = Astro.url.searchParams.has('error');
 ---
 <section class="contact-section" id="contact">
   <div class="wrap">
@@ -19,18 +9,6 @@ const error = Astro.url.searchParams.has('error');
     <p class="contact-section__lede">
       Open to senior and staff engineering roles. Contract and fractional work considered.
     </p>
-
-    {sent && (
-      <p class="contact-section__banner contact-section__banner--ok mono" role="status">
-        <span class="contact-section__banner-dot" aria-hidden="true"></span>
-        Message sent. I reply within two working days.
-      </p>
-    )}
-    {error && (
-      <p class="contact-section__banner contact-section__banner--error mono" role="status">
-        Something went wrong sending your message. Please try again, or email me directly below.
-      </p>
-    )}
 
     <Cta placement="contact" />
 
@@ -49,28 +27,6 @@ const error = Astro.url.searchParams.has('error');
   .contact-section { padding-block: var(--space-xl); border-top: 1px solid var(--border); }
   .contact-section__title { font-size: var(--step-2); font-weight: 600; letter-spacing: -0.02em; }
   .contact-section__lede { color: var(--muted); margin-block: var(--space-s) var(--space-l); }
-
-  .contact-section__banner {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    width: fit-content;
-    max-width: 60ch;
-    padding: 0.6rem 1rem;
-    margin-bottom: var(--space-l);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--surface);
-    font-size: var(--step--1);
-  }
-  .contact-section__banner-dot {
-    width: 7px;
-    height: 7px;
-    flex-shrink: 0;
-    border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
-  }
 
   .contact-section__form { margin-top: var(--space-xl); }
   .contact-section__links {
