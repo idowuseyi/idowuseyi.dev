@@ -12,3 +12,8 @@
 dist
 .astro
 node_modules
+
+# lighthouse-ci artifacts
+.lighthouseci
+# WSL/Chrome interop can create dirs literally named with Windows paths
+C:*
