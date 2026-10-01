@@ -12,6 +12,33 @@ npm run preview   # wrangler dev, previewing the built output
 npm run deploy    # astro build && wrangler deploy
 ```
 
+## Configuration
+
+`src/pages/api/contact.ts` (`POST /api/contact`) is this project's first
+on-demand route (`export const prerender = false`), so the build now emits a
+Worker, not purely static assets. It delivers submissions through
+[Resend](https://resend.com) and needs two secrets, set **after the first
+deploy** (a Worker has to exist before `wrangler secret put` can target it):
+
+```
+npx wrangler secret put RESEND_API_KEY
+npx wrangler secret put CONTACT_TO_EMAIL
+```
+
+- `RESEND_API_KEY` — a Resend API key with permission to send email.
+- `CONTACT_TO_EMAIL` — the inbox that receives contact-form submissions.
+
+Never commit real values for these; `wrangler secret put` prompts for the
+value interactively and stores it only in the Cloudflare account's secret
+store.
+
+Call booking (`src/components/BookCall.astro`) is feature-flagged on
+`CAL_LINK` in `src/data/cal.ts`, currently `''` because the Cal.com account
+doesn't exist yet. While it's empty, the "Book a 20-min call" CTA falls
+through to its `href="#contact"` and scrolls to the contact form instead of
+opening a dialog. Setting `CAL_LINK` to the real slug (e.g. `'idowuseyi/20min'`)
+is the only change needed to activate the booking dialog.
+
 ## Regenerating a diagram
 
 Diagrams under `src/diagrams/` (e.g. `ko-os.svg`) are authored as Mermaid
