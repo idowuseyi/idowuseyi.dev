@@ -25,7 +25,7 @@ const minutes = isExternal ? null : readingTime(post.body ?? '');
   >
     <p class="post-card__meta mono">
       <time datetime={iso}>{human}</time>
-      {minutes !== null && <span> · {minutes} min read</span>}
+      {minutes !== null && <span> · {minutes} minute read</span>}
       {isExternal && <span class="post-card__badge">{d.platform} ↗</span>}
     </p>
     <h3 class="post-card__title">{d.title}</h3>

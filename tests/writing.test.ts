@@ -85,8 +85,8 @@ describe('PostCard', () => {
     const c = await AstroContainer.create();
     const nativeHtml = await c.renderToString(PostCard, { props: { post: entry(nativeData) } });
     const externalHtml = await c.renderToString(PostCard, { props: { post: entry(externalData) } });
-    expect(nativeHtml).toContain('min read');
-    expect(externalHtml).not.toContain('min read');
+    expect(nativeHtml).toContain('minute read');
+    expect(externalHtml).not.toContain('minute read');
   });
 });
 

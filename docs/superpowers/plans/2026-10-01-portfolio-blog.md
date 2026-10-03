@@ -585,7 +585,7 @@ const human = pubDate.toLocaleDateString('en-GB', {
     <div class="wrap">
       <header class="post__head">
         <p class="post__meta mono">
-          <time datetime={iso}>{human}</time> · {minutes} min read
+          <time datetime={iso}>{human}</time> · {minutes} minute read
         </p>
         <h1 class="post__title">{title}</h1>
         <p class="post__standfirst">{description}</p>
@@ -729,10 +729,10 @@ Expected: succeeds, and generates `dist/client/writing/why-schema-validated-llm-
 ```bash
 ls dist/client/writing/
 grep -c "astro-code" dist/client/writing/why-schema-validated-llm-output/index.html
-grep -o "min read" dist/client/writing/why-schema-validated-llm-output/index.html | head -1
+grep -o "minute read" dist/client/writing/why-schema-validated-llm-output/index.html | head -1
 ls dist/client/writing/ | grep -c "ransomware\|understanding-api\|mastra" || echo "0 external pages — correct"
 ```
-Expected: the native post has a directory; Shiki emitted at least one `astro-code` block; "min read" is present; **no** directory exists for any external post.
+Expected: the native post has a directory; Shiki emitted at least one `astro-code` block; "minute read" is present; **no** directory exists for any external post.
 
 - [ ] **Step 11: Commit**
 
@@ -854,8 +854,8 @@ describe('PostCard', () => {
     const c = await AstroContainer.create();
     const nativeHtml = await c.renderToString(PostCard, { props: { post: entry(nativeData) } });
     const externalHtml = await c.renderToString(PostCard, { props: { post: entry(externalData) } });
-    expect(nativeHtml).toContain('min read');
-    expect(externalHtml).not.toContain('min read');
+    expect(nativeHtml).toContain('minute read');
+    expect(externalHtml).not.toContain('minute read');
   });
 });
 
@@ -977,7 +977,7 @@ const minutes = isExternal ? null : readingTime(post.body ?? '');
   >
     <p class="post-card__meta mono">
       <time datetime={iso}>{human}</time>
-      {minutes !== null && <span> · {minutes} min read</span>}
+      {minutes !== null && <span> · {minutes} minute read</span>}
       {isExternal && <span class="post-card__badge">{d.platform} ↗</span>}
     </p>
     <h3 class="post-card__title">{d.title}</h3>
