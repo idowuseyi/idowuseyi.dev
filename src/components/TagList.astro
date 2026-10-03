@@ -1,18 +1,25 @@
 ---
-// Minimal placeholder created ahead of schedule: Task 3 owns the real
-// tag-routing (linking each pill to /writing/tags/<tag>/ or similar). This
-// task only needs something to render the post's tags, so these are plain,
-// unlinked pills. Do not invent the tag-route URL here.
+// Renders a post's tags as pills. Each pill links to its tag page at
+// /writing/tags/<slug>/ by default; pass linked={false} for a plain-text
+// rendering (e.g. somewhere a tag page link would be redundant or self-
+// referential).
+import { tagSlug } from '../lib/tags';
+
 interface Props {
   tags: string[];
+  linked?: boolean;
 }
 
-const { tags } = Astro.props;
+const { tags, linked = true } = Astro.props;
 ---
 {tags.length > 0 && (
   <ul class="tag-list mono">
     {tags.map((tag) => (
-      <li class="tag-list__item">{tag}</li>
+      <li class="tag-list__item">
+        {linked
+          ? <a class="tag-list__link" href={`/writing/tags/${tagSlug(tag)}/`}>{tag}</a>
+          : tag}
+      </li>
     ))}
   </ul>
 )}
@@ -31,5 +38,18 @@ const { tags } = Astro.props;
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 0.2em 0.6em;
+  }
+
+  .tag-list__link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .tag-list__item:hover {
+    border-color: var(--text);
+  }
+
+  .tag-list__item:hover .tag-list__link {
+    color: var(--text);
   }
 </style>

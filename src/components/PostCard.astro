@@ -1,0 +1,62 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { readingTime } from '../lib/reading-time';
+
+interface Props {
+  post: CollectionEntry<'posts'>;
+}
+
+const { post } = Astro.props;
+const d = post.data;
+const isExternal = d.kind === 'external';
+
+// A native post links to its own page; an external one goes straight to the
+// publisher, because this site has no page for it by design.
+const href = isExternal ? d.url : `/writing/${post.id}/`;
+const iso = d.pubDate.toISOString();
+const human = d.pubDate.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+const minutes = isExternal ? null : readingTime(post.body ?? '');
+---
+<article class="post-card reveal">
+  <a
+    class="post-card__link"
+    href={href}
+    {...isExternal ? { rel: 'noopener', target: '_blank' } : {}}
+  >
+    <p class="post-card__meta mono">
+      <time datetime={iso}>{human}</time>
+      {minutes !== null && <span> · {minutes} min read</span>}
+      {isExternal && <span class="post-card__badge">{d.platform} ↗</span>}
+    </p>
+    <h3 class="post-card__title">{d.title}</h3>
+    <p class="post-card__desc">{d.description}</p>
+  </a>
+</article>
+
+<style>
+  .post-card { border-top: 1px solid var(--border); }
+  .post-card:last-child { border-bottom: 1px solid var(--border); }
+  .post-card__link {
+    display: grid;
+    gap: var(--space-s);
+    padding-block: var(--space-m);
+    text-decoration: none;
+    color: inherit;
+  }
+  .post-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+    align-items: center;
+    color: var(--muted);
+    font-size: var(--step--1);
+  }
+  .post-card__badge {
+    padding: 0.15rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+  }
+  .post-card__title { font-size: var(--step-1); font-weight: 500; line-height: 1.3; }
+  .post-card__link:hover .post-card__title { color: var(--accent); }
+  .post-card__desc { color: var(--muted); font-size: var(--step--1); max-width: 68ch; }
+</style>
