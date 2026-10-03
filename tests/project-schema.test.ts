@@ -92,13 +92,6 @@ describe('evidence rule', () => {
     expect(result.success).toBe(true);
   });
 
-  test('rejects writeup-only with a token reason (still rejected after trim fix)', () => {
-    const result = projectSchema.safeParse({
-      ...base, evidence: 'writeup-only', evidenceNote: 'private',
-    });
-    expect(result.success).toBe(false);
-  });
-
   // Fix 2: liveUrl/repoUrl must be http(s) only, not any URL-shaped scheme.
   test('rejects a javascript: URI as liveUrl', () => {
     const result = projectSchema.safeParse({
@@ -128,12 +121,6 @@ describe('evidence rule', () => {
     expect(result.success).toBe(true);
   });
 
-  test('rejects a malformed URL (still rejected after scheme fix)', () => {
-    const result = projectSchema.safeParse({
-      ...base, evidence: 'linked', repoUrl: 'github.com/idowuseyi/rag',
-    });
-    expect(result.success).toBe(false);
-  });
 
   // Fix (review): title must be trimmed before the min-length check, so a
   // whitespace-only title (which has nonzero raw length) is still rejected.

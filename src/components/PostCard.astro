@@ -54,6 +54,8 @@ const minutes = isExternal ? null : readingTime(post.body ?? '');
   .post-card__badge {
     padding: 0.15rem 0.5rem;
     border: 1px solid var(--border);
+    /* Intentionally a pill, not token drift: needs to exceed half the
+       element height, not match --radius. */
     border-radius: 100px;
   }
   .post-card__title { font-size: var(--step-1); font-weight: 500; line-height: 1.3; }

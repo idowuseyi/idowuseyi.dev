@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+
+export const prerender = true;
+---
+<BaseLayout
+  title="Page not found — Oluwaseyi Idowu"
+  description="This page doesn't exist."
+  canonicalPath="/404"
+  noindex={true}
+>
+  <SiteHeader />
+  <main class="not-found">
+    <div class="wrap">
+      <h1 class="not-found__title">Page not found.</h1>
+      <p class="not-found__body">The page you're looking for doesn't exist or has moved.</p>
+      <p class="not-found__links mono">
+        <a href="/">&larr; Back to home</a>
+        <a href="/writing/">Read the writing</a>
+      </p>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .not-found { padding-block: var(--space-xl); min-height: 60vh; display: flex; align-items: center; }
+  .not-found__title { font-size: var(--step-2); font-weight: 600; letter-spacing: -0.02em; }
+  .not-found__body { color: var(--muted); margin-top: var(--space-m); max-width: 60ch; }
+  .not-found__links { display: flex; gap: var(--space-m); margin-top: var(--space-l); }
+  .not-found__links a { color: var(--accent); font-weight: 500; }
+</style>

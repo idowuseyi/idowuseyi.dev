@@ -237,4 +237,59 @@ describe('POST /api/contact delivery', () => {
     expect(response.status).toBe(303);
     expect(response.headers.get('Location')).toBe('/contact-error');
   });
+
+  test('returns a generic error (never a bare 500) and logs the cause when request.formData() throws', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    const request = {
+      formData: () => Promise.reject(new Error('malformed multipart body')),
+      headers: new Headers({ accept: '*/*' }),
+    } as unknown as Request;
+
+    const response = await POST({ request } as Parameters<typeof POST>[0]);
+
+    expect(response.status).toBe(400);
+    // A thrown body-parse error must never resolve to success, and must
+    // never reach the Resend call.
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalled();
+  });
+
+  test('redirects an HTML-accepting request to /contact-error when request.formData() throws', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const request = {
+      formData: () => Promise.reject(new Error('malformed multipart body')),
+      headers: new Headers({ accept: 'text/html,application/xhtml+xml' }),
+    } as unknown as Request;
+
+    const response = await POST({ request } as Parameters<typeof POST>[0]);
+
+    expect(response.status).toBe(303);
+    expect(response.headers.get('Location')).toBe('/contact-error');
+  });
+
+  test('returns 502 and logs the cause when the outbound delivery fetch throws, never reporting success', async () => {
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('network unreachable'));
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const request = formRequest({ ...valid, _hp: '' }, { accept: '*/*' });
+    const response = await POST({ request } as Parameters<typeof POST>[0]);
+
+    expect(response.status).toBe(502);
+    expect(errorSpy).toHaveBeenCalled();
+  });
+
+  test('redirects an HTML-accepting request to /contact-error when the outbound delivery fetch throws', async () => {
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('network unreachable'));
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const request = formRequest(
+      { ...valid, _hp: '' },
+      { accept: 'text/html,application/xhtml+xml' },
+    );
+    const response = await POST({ request } as Parameters<typeof POST>[0]);
+
+    expect(response.status).toBe(303);
+    expect(response.headers.get('Location')).toBe('/contact-error');
+  });
 });

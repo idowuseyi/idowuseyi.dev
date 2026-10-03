@@ -1,5 +1,5 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
+import StatusPage from '../layouts/StatusPage.astro';
 
 // Static redirect target for the no-JS (plain HTML form POST) contact path:
 // /api/contact 303s here on failure instead of baking a `?error=1` query
@@ -7,34 +7,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 // once it's a static file. Never echoes any submitted field or internal
 // error detail — only a fixed, generic message.
 ---
-<BaseLayout
+<StatusPage
   title="Message not sent — Oluwaseyi Idowu"
   description="Your message could not be sent."
+  heading="Something went wrong."
   canonicalPath="/contact-error"
-  noindex
 >
-  <main class="status-page">
-    <div class="wrap">
-      <p class="status-page__eyebrow mono">Message not sent</p>
-      <h1 class="status-page__title">Something went wrong.</h1>
-      <p class="status-page__body">
-        Your message could not be sent. Please try again, or email
-        <a class="status-page__link" href="mailto:hello@idowuseyi.dev">hello@idowuseyi.dev</a> directly.
-      </p>
-      <a class="status-page__link" href="/#contact">&larr; Back to the contact form</a>
-    </div>
-  </main>
-</BaseLayout>
-
-<style>
-  .status-page { padding-block: var(--space-xl); min-height: 60vh; display: flex; align-items: center; }
-  .status-page__eyebrow { color: var(--muted); font-size: var(--step--1); margin-bottom: var(--space-m); }
-  .status-page__title {
-    font-size: var(--step-2);
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    margin-bottom: var(--space-m);
-  }
-  .status-page__body { color: var(--muted); max-width: 60ch; margin-bottom: var(--space-l); }
-  .status-page__link { color: var(--accent); font-weight: 500; }
-</style>
+  <p slot="eyebrow" class="status-page__eyebrow mono">Message not sent</p>
+  <p class="status-page__body">
+    Your message could not be sent. Please try again, or email
+    <a class="status-page__link" href="mailto:hello@idowuseyi.dev">hello@idowuseyi.dev</a> directly.
+  </p>
+  <a class="status-page__link" href="/#contact">&larr; Back to the contact form</a>
+</StatusPage>

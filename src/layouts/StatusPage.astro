@@ -1,0 +1,49 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  heading: string;
+  canonicalPath: string;
+}
+
+const { title, description, heading, canonicalPath } = Astro.props;
+---
+<BaseLayout title={title} description={description} canonicalPath={canonicalPath} noindex={true}>
+  <main class="status-page">
+    <div class="wrap">
+      <slot name="eyebrow" />
+      <h1 class="status-page__title">{heading}</h1>
+      <slot />
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .status-page { padding-block: var(--space-xl); min-height: 60vh; display: flex; align-items: center; }
+  .status-page__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--muted);
+    font-size: var(--step--1);
+    margin-bottom: var(--space-m);
+  }
+  .status-page__dot {
+    width: 7px;
+    height: 7px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+  .status-page__title {
+    font-size: var(--step-2);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--space-m);
+  }
+  .status-page__body { color: var(--muted); max-width: 60ch; margin-bottom: var(--space-l); }
+  .status-page__link { color: var(--accent); font-weight: 500; }
+</style>
