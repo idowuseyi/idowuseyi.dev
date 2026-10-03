@@ -135,6 +135,15 @@ describe('evidence rule', () => {
     expect(result.success).toBe(false);
   });
 
+  // Fix (review): title must be trimmed before the min-length check, so a
+  // whitespace-only title (which has nonzero raw length) is still rejected.
+  test('rejects a whitespace-only title', () => {
+    const result = projectSchema.safeParse({
+      ...base, evidence: 'linked', liveUrl: 'https://demo.idowuseyi.dev', title: '   ',
+    });
+    expect(result.success).toBe(false);
+  });
+
   // Fix 3: unrecognised frontmatter keys must be rejected, not silently stripped.
   test('rejects a linked project carrying an unrecognised key', () => {
     const result = projectSchema.safeParse({

@@ -79,4 +79,35 @@ describe('post schema', () => {
     const r = postSchema.safeParse({ ...base, kind: 'native', description: '   ' });
     expect(r.success).toBe(false);
   });
+
+  // Fix 1: title must be trimmed before the min-length check, so a
+  // whitespace-only title (which has nonzero raw length) is still rejected.
+  test('rejects a whitespace-only title', () => {
+    const r = postSchema.safeParse({ ...base, kind: 'native', title: '   ' });
+    expect(r.success).toBe(false);
+  });
+
+  // Fix 2: an external post must keep another publisher's canonical, so one
+  // pointing back at this site's own domain is a contradiction and rejected.
+  test('rejects an external post whose url is this site itself', () => {
+    const r = postSchema.safeParse({
+      ...base, kind: 'external', platform: 'Dev.to', url: 'https://idowuseyi.dev/blog/foo',
+    });
+    expect(r.success).toBe(false);
+  });
+
+  test('rejects an external post whose url is the www subdomain of this site', () => {
+    const r = postSchema.safeParse({
+      ...base, kind: 'external', platform: 'Dev.to', url: 'https://www.idowuseyi.dev/blog/foo',
+    });
+    expect(r.success).toBe(false);
+  });
+
+  test('accepts an external post whose url merely looks similar to this site', () => {
+    const r = postSchema.safeParse({
+      ...base, kind: 'external', platform: 'Dev.to',
+      url: 'https://notidowuseyi.dev.example.com/blog/foo',
+    });
+    expect(r.success).toBe(true);
+  });
 });

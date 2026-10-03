@@ -6,11 +6,11 @@ const metric = z.object({
 });
 
 const common = {
-  title: z.string().min(1),
-  kicker: z.string().min(1),
-  role: z.string().min(1),
+  title: z.string().trim().min(1),
+  kicker: z.string().trim().min(1),
+  role: z.string().trim().min(1),
   order: z.number().int().positive(),
-  blurb: z.string().min(1),
+  blurb: z.string().trim().min(1),
   tags: z.array(z.string().min(1)).min(1),
   metrics: z.array(metric).min(1).max(3),
   diagram: z.string().optional(),

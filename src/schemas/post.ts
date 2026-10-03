@@ -6,7 +6,7 @@ import { z } from 'astro/zod';
 const articleUrl = z.string().url({ protocol: /^https?$/ });
 
 const common = {
-  title: z.string().min(1),
+  title: z.string().trim().min(1),
   description: z.string().trim().min(1),
   pubDate: z.coerce.date(),
   tags: z.array(z.string().min(1)).min(1),
@@ -31,7 +31,17 @@ const external = z
     platform: z.string().min(1),
     url: articleUrl,
   })
-  .strict();
+  .strict()
+  .refine(
+    (data) => {
+      const hostname = new URL(data.url).hostname;
+      return hostname !== 'idowuseyi.dev' && hostname !== 'www.idowuseyi.dev';
+    },
+    {
+      message: 'An external post must point at another publisher, not this site.',
+      path: ['url'],
+    },
+  );
 
 // A discriminated union on `kind` gives readable build errors keyed to the
 // variant, rather than a plain union's wall of every branch's failures.
