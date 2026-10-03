@@ -1,0 +1,35 @@
+---
+// Minimal placeholder created ahead of schedule: Task 3 owns the real
+// tag-routing (linking each pill to /writing/tags/<tag>/ or similar). This
+// task only needs something to render the post's tags, so these are plain,
+// unlinked pills. Do not invent the tag-route URL here.
+interface Props {
+  tags: string[];
+}
+
+const { tags } = Astro.props;
+---
+{tags.length > 0 && (
+  <ul class="tag-list mono">
+    {tags.map((tag) => (
+      <li class="tag-list__item">{tag}</li>
+    ))}
+  </ul>
+)}
+
+<style>
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+    list-style: none;
+  }
+
+  .tag-list__item {
+    font-size: var(--step--1);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.2em 0.6em;
+  }
+</style>

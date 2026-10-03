@@ -1,0 +1,94 @@
+/* Long-form reading styles, scoped to .prose so they never leak into the
+   marketing sections. Tokens only — no literals. */
+.prose {
+  max-width: 68ch;
+  color: var(--text);
+  font-size: var(--step-0);
+  line-height: 1.75;
+}
+
+.prose > * + * { margin-top: var(--space-m); }
+
+.prose h2,
+.prose h3 {
+  margin-top: var(--space-l);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.prose h2 { font-size: var(--step-1); }
+.prose h3 { font-size: var(--step-0); color: var(--muted); }
+
+.prose a {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 3px;
+}
+.prose a:hover { text-decoration-color: var(--text); }
+
+.prose strong { font-weight: 600; }
+
+.prose ul,
+.prose ol { padding-left: 1.25rem; }
+.prose li + li { margin-top: var(--space-s); }
+
+.prose blockquote {
+  border-left: 2px solid var(--border);
+  padding-left: var(--space-m);
+  color: var(--muted);
+}
+
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+
+/* Shiki emits <pre class="astro-code">; the inline-code treatment above must
+   not double up inside it. */
+.prose pre {
+  background: var(--surface) !important;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-m);
+  overflow-x: auto;
+  font-size: var(--step--1);
+  line-height: 1.6;
+}
+
+.prose pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+}
+
+.prose hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin-block: var(--space-l);
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--step--1);
+}
+.prose th,
+.prose td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+}
+.prose th { color: var(--muted); font-weight: 500; }

@@ -1,0 +1,63 @@
+---
+kind: native
+title: Schema-Validated LLM Output Beats Prompt Discipline
+description: Why constraining a model's output with a validated schema is more reliable than asking it nicely, and what that looks like in production.
+pubDate: 2026-10-01
+tags: ['AI Systems', 'TypeScript', 'Zod']
+---
+
+The usual first attempt at structured output from a language model is a
+carefully worded prompt: *return only JSON, with these fields, no prose*. It
+works often enough to feel solved, and then it does not.
+
+## Prompts are requests, schemas are contracts
+
+A prompt asks for a shape. Nothing enforces it. The model may add a prose
+preamble, wrap the JSON in a code fence, rename a field, or return a plausible
+object with a subtly wrong type — a number where a string was expected, a
+single item where an array was. Each of those passes `JSON.parse` and fails
+later, somewhere less obvious.
+
+Validating at the boundary inverts this. The model's response is parsed
+against a schema before anything downstream sees it, so a malformed
+generation fails where it happened rather than three functions away.
+
+## What this looks like
+
+In the content platform I built, strategy and calendar generations are parsed
+through Zod schemas that have their own test suites. The schema is the
+contract; the prompt is an implementation detail that can change freely as
+long as the output still satisfies it.
+
+```ts
+const calendarEntry = z.object({
+  day: z.number().int().min(1).max(31),
+  channel: z.enum(['blog', 'email', 'social']),
+  headline: z.string().min(1),
+});
+
+const result = calendarEntry.safeParse(modelOutput);
+if (!result.success) {
+  // Retry with result.error fed back into the next prompt, bounded by an
+  // attempt limit — see "the part people skip" below.
+}
+```
+
+The practical consequences are worth stating plainly:
+
+- **Failures are local.** A bad generation throws at the parse site, with the
+  offending field named.
+- **Prompts become refactorable.** Rewording a prompt is safe, because the
+  schema still gates the result.
+- **The schema is testable without a model.** You can assert that malformed
+  shapes are rejected without spending a token.
+
+## The part people skip
+
+Validation is not retry logic. A schema tells you the output was wrong; it
+does not get you a right one. Production needs both — parse, and on failure
+retry with the validation error fed back in, bounded by an attempt limit so a
+persistently confused model cannot spend your budget.
+
+That combination is unglamorous and it is most of what makes model output safe
+to build on.

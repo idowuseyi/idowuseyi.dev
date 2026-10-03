@@ -18,4 +18,10 @@ export default defineConfig({
     mdx(),
     sitemap({ filter: (page) => !/\/(thanks|contact-error)\/?$/.test(page) }),
   ],
+  markdown: {
+    shikiConfig: {
+      theme: 'github-dark-default',
+      wrap: true,
+    },
+  },
 });
