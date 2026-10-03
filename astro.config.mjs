@@ -16,7 +16,10 @@ export default defineConfig({
   adapter: process.env.VITEST ? undefined : cloudflare(),
   integrations: [
     mdx(),
-    sitemap({ filter: (page) => !/\/(thanks|contact-error)\/?$/.test(page) }),
+    sitemap({
+      filter: (page) =>
+        !/\/(thanks|contact-error)\/?$/.test(page) && !/\/writing\/tags\//.test(page),
+    }),
   ],
   markdown: {
     shikiConfig: {

@@ -8,9 +8,10 @@ interface Props {
   description: string;
   canonicalPath?: string;
   noindex?: boolean;
+  jsonLd?: Record<string, unknown>;
 }
 
-const { title, description, canonicalPath = '/', noindex = false } = Astro.props;
+const { title, description, canonicalPath = '/', noindex = false, jsonLd } = Astro.props;
 const canonical = new URL(canonicalPath, Astro.site ?? 'https://idowuseyi.dev');
 ---
 <!doctype html>
@@ -26,6 +27,12 @@ const canonical = new URL(canonicalPath, Astro.site ?? 'https://idowuseyi.dev');
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical.href} />
+    <meta property="og:image" content={new URL('/og.png', Astro.site ?? 'https://idowuseyi.dev').href} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="alternate" type="application/rss+xml" title="Oluwaseyi Idowu — Writing" href="/rss.xml" />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
     <meta name="theme-color" content="#08090A" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <noscript><style>.reveal { opacity: 1; transform: none; }</style></noscript>

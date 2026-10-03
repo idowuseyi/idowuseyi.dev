@@ -17,8 +17,26 @@ const iso = pubDate.toISOString();
 const human = pubDate.toLocaleDateString('en-GB', {
   day: 'numeric', month: 'long', year: 'numeric',
 });
+
+const site = Astro.site?.href ?? 'https://idowuseyi.dev/';
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: title,
+  description,
+  datePublished: iso,
+  author: { '@type': 'Person', name: 'Oluwaseyi Idowu', url: site },
+  publisher: { '@type': 'Person', name: 'Oluwaseyi Idowu', url: site },
+  mainEntityOfPage: new URL(canonicalPath, site).href,
+  keywords: tags.join(', '),
+};
 ---
-<BaseLayout title={`${title} — Oluwaseyi Idowu`} description={description} canonicalPath={canonicalPath}>
+<BaseLayout
+  title={`${title} — Oluwaseyi Idowu`}
+  description={description}
+  canonicalPath={canonicalPath}
+  jsonLd={jsonLd}
+>
   <article class="post">
     <div class="wrap">
       <header class="post__head">
