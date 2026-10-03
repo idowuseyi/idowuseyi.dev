@@ -29,4 +29,8 @@ jobs:
         # no browser install step is added here. --no-sandbox (set in
         # lighthouserc.json's chromeFlags) is required because the Actions
         # runner executes as root.
-        run: npx lhci autorun
+        # Fetched on demand rather than declared as a devDependency: its
+        # Lighthouse/Puppeteer tree carries 14 high-severity advisories that are
+        # not exploitable here (dev-only, trusted inputs) but have no patched
+        # release, and leaving them in the lockfile makes `npm audit` unreadable.
+        run: npx --yes @lhci/cli@0.15.1 autorun

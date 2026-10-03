@@ -95,6 +95,30 @@ committed and CI never invokes this script.
 
 ## Known gaps
 
+**One open npm audit finding, assessed and accepted.** `npm audit` reports
+`http-cache-semantics` (high) four times — once directly and three more as it
+propagates up through `astro` to `@astrojs/cloudflare` and `@astrojs/mdx`. It is
+a single advisory, not four problems.
+
+The advisory is cross-user cached-response disclosure via `max-stale` handling.
+Exploiting it needs a shared HTTP cache serving multiple users; Astro uses the
+package at build time and it is not part of the deployed Worker, so there is no
+such cache in this project's path. **No patched release exists** — nothing above
+`4.2.0` is published except two betas — and every fix npm offers is a
+semver-major bump that would move `astro` to a different major.
+
+Re-check when a patched `http-cache-semantics` ships, or when Astro bumps its
+own dependency.
+
+`@lhci/cli` is deliberately NOT a devDependency for the same reason: its
+Lighthouse/Puppeteer tree carried 14 further high-severity advisories with no
+patched release. None were exploitable here — `extract-zip` symlink traversal
+needs a malicious archive and it only ever extracts Chrome from Google,
+`basic-ftp` needs a malicious FTP server it never contacts — but keeping them in
+the lockfile made `npm audit` unreadable, which is how a genuine future
+vulnerability gets missed. CI fetches the tool with `npx --yes` instead.
+
+
 **Medium links are not link-checked.** `medium.com` serves a Cloudflare bot
 challenge to automated requests, so every Medium URL returns 403 to
 `linkinator` regardless of whether the article exists. Verified: the two
