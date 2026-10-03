@@ -95,6 +95,15 @@ committed and CI never invokes this script.
 
 ## Known gaps
 
+**Medium links are not link-checked.** `medium.com` serves a Cloudflare bot
+challenge to automated requests, so every Medium URL returns 403 to
+`linkinator` regardless of whether the article exists. Verified: the two
+Medium posts in `src/content/posts/` both 403 to curl while the Dev.to post
+returns 200, so this is a blanket block rather than a dead link. `medium.com`
+is therefore in the CI link-check skip list. Those URLs need a manual
+browser check if one is ever in doubt.
+
+
 **Type checking is not gated in CI.** The plan's intent was `astro check`,
 but that cannot run under this project's pinned TypeScript (`^7.0.2`) —
 confirmed empirically, not assumed. Plain `tsc --noEmit` does run, but
