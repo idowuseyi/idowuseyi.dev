@@ -12,11 +12,18 @@ works often enough to feel solved, and then it does not.
 
 ## Prompts are requests, schemas are contracts
 
-A prompt asks for a shape. Nothing enforces it. The model may add a prose
-preamble, wrap the JSON in a code fence, rename a field, or return a plausible
-object with a subtly wrong type — a number where a string was expected, a
-single item where an array was. Each of those passes `JSON.parse` and fails
-later, somewhere less obvious.
+A prompt asks for a shape. Nothing enforces it, and the ways that bites split
+into two kinds.
+
+The loud kind is a model that wraps the JSON in a prose preamble or a markdown
+code fence. The string is no longer valid JSON, `JSON.parse` throws at the call
+site, and you find out immediately.
+
+The quiet kind is worse: syntactically valid JSON with a renamed field, or a
+subtly wrong type — a number where a string was expected, a single item where
+an array was. That parses cleanly, satisfies every `typeof` check nobody wrote,
+and fails three functions away with a stack trace that points at the symptom
+rather than the cause.
 
 Validating at the boundary inverts this. The model's response is parsed
 against a schema before anything downstream sees it, so a malformed
