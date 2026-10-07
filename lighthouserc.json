@@ -3,7 +3,9 @@
     "collect": {
       "staticDistDir": "./dist/client",
       "url": [
-        "/index.html"
+        "/index.html",
+        "/writing/index.html",
+        "/writing/why-schema-validated-llm-output/index.html"
       ],
       "numberOfRuns": 3,
       "settings": {

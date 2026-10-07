@@ -107,8 +107,16 @@ import { profile } from '../data/profile';
 </style>
 
 <script>
-  const form = document.querySelector('.contact') as HTMLFormElement | null;
-  if (form) {
+  // Re-bound after every client-side navigation. The ClientRouter runs an
+  // inline script once per session, and a swap replaces the form with a fresh
+  // element carrying no listeners. Unbound, the router's own submit handler
+  // would take the event instead and try to render /api/contact's JSON as a
+  // page; our listener calls preventDefault() first, and because it sits on
+  // the form rather than on document it always runs first.
+  function initContactForm() {
+    const form = document.querySelector('.contact') as HTMLFormElement | null;
+    if (!form) return;
+
     const status = form.querySelector('.contact__status') as HTMLElement;
     const submit = form.querySelector('.contact__submit') as HTMLButtonElement;
 
@@ -137,4 +145,7 @@ import { profile } from '../data/profile';
       }
     });
   }
+
+  initContactForm();
+  document.addEventListener('astro:after-swap', initContactForm);
 </script>

@@ -1,4 +1,5 @@
 ---
+import { ClientRouter } from 'astro:transitions';
 import '@fontsource-variable/geist';
 import '@fontsource-variable/geist-mono';
 import '../styles/tokens.css';
@@ -56,15 +57,50 @@ const jsonLdText = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : ''
     <meta name="theme-color" content="#08090A" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <noscript><style>.reveal { opacity: 1; transform: none; }</style></noscript>
+    {/*
+      View transitions between the routes this site now has. A progressive
+      enhancement: without JavaScript, or in a browser without the View
+      Transitions API, every link is still an ordinary full navigation. Astro's
+      own viewtransitions.css disables all of its animations under
+      `prefers-reduced-motion`, so no extra guard is needed here.
+
+      An Astro comment rather than an HTML one: an HTML comment is served on
+      every page, and this is a note for whoever edits the layout.
+    */}
+    <ClientRouter />
   </head>
   <body>
     <slot />
+    {/*
+      Re-run on every client-side navigation, not just the first page of a
+      session. The ClientRouter will not re-execute an inline script whose text
+      it has already run (deselectScripts in
+      astro/dist/transitions/swap-functions.js keys on textContent), and this
+      script is byte-identical on every page. Left as a one-shot it would leave
+      every `.reveal` element on a navigated-to page stuck at the `opacity: 0`
+      it starts from — a blank page after clicking any internal link.
+
+      `astro:after-swap` rather than `data-astro-rerun`: the attribute would
+      force the script inline, costing its minification and its module scope,
+      and a re-run of a classic top-level `const` throws a redeclaration
+      error. `astro:after-swap` fires once per swap with the new DOM already in
+      place and before the transition paints, so there is no flash of the
+      pre-reveal state.
+    */}
     <script>
-      const nodes = document.querySelectorAll('.reveal');
-      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (reduced || !('IntersectionObserver' in window)) {
-        nodes.forEach((n) => n.classList.add('is-visible'));
-      } else {
+      let observer: IntersectionObserver | null = null;
+
+      function initReveal() {
+        // The previous page's observer still holds its now-detached nodes.
+        observer?.disconnect();
+        observer = null;
+
+        const nodes = document.querySelectorAll('.reveal');
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduced || !('IntersectionObserver' in window)) {
+          nodes.forEach((n) => n.classList.add('is-visible'));
+          return;
+        }
         const io = new IntersectionObserver((entries) => {
           for (const entry of entries) {
             if (!entry.isIntersecting) continue;
@@ -72,8 +108,12 @@ const jsonLdText = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : ''
             io.unobserve(entry.target);
           }
         }, { rootMargin: '0px 0px -10% 0px' });
+        observer = io;
         nodes.forEach((n) => io.observe(n));
       }
+
+      initReveal();
+      document.addEventListener('astro:after-swap', initReveal);
     </script>
   </body>
 </html>

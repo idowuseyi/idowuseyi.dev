@@ -4,11 +4,20 @@ import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import { load as loadYaml } from 'js-yaml';
 import { beforeAll, describe, expect, test } from 'vitest';
 import Index from '../src/pages/index.astro';
+import { postSchema } from '../src/schemas/post';
 import { projectSchema } from '../src/schemas/project';
 
 let html = '';
 
 const projectsDir = path.resolve(__dirname, '../src/content/projects');
+const postsDir = path.resolve(__dirname, '../src/content/posts');
+
+function frontmatterOf(dir: string, filename: string): Record<string, unknown> {
+  const raw = readFileSync(path.join(dir, filename), 'utf8');
+  const match = raw.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) throw new Error(`${filename} has no frontmatter block.`);
+  return loadYaml(match[1]) as Record<string, unknown>;
+}
 
 // `getCollection('projects')` returns an empty array under Vitest — Task 5
 // established that the content layer's data store isn't populated in this
@@ -19,10 +28,19 @@ const projectsDir = path.resolve(__dirname, '../src/content/projects');
 // case studies" and "every one satisfies the evidence rule" instead of
 // vacuously passing over an empty collection.
 function readProjectFrontmatter(filename: string): unknown {
-  const raw = readFileSync(path.join(projectsDir, filename), 'utf8');
-  const match = raw.match(/^---\n([\s\S]*?)\n---/);
-  if (!match) throw new Error(`${filename} has no frontmatter block.`);
-  return loadYaml(match[1]);
+  return frontmatterOf(projectsDir, filename);
+}
+
+// Posts are read the same way and for the same reason — `getCollection('posts')`
+// is empty here too, so the Writing section's selection rule is only
+// observable against the built page.
+function readPostFrontmatter(filename: string): { title: string; pubDate: Date; draft: boolean } {
+  const data = frontmatterOf(postsDir, filename);
+  const parsed = postSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error(`${filename}: ${JSON.stringify(parsed.error.issues)}`);
+  }
+  return { title: parsed.data.title, pubDate: parsed.data.pubDate, draft: parsed.data.draft };
 }
 
 beforeAll(async () => {
@@ -32,7 +50,7 @@ beforeAll(async () => {
 
 describe('homepage', () => {
   test('presents sections in the spec order', () => {
-    const order = ['hero', 'work', 'cta-break', 'experience', 'contact'];
+    const order = ['hero', 'work', 'cta-break', 'experience', 'writing', 'contact'];
     const positions = order.map((id) => html.indexOf(`id="${id}"`));
     expect(positions.every((p) => p !== -1)).toBe(true);
     expect([...positions].sort((a, b) => a - b)).toEqual(positions);
@@ -88,6 +106,62 @@ describe('homepage', () => {
       // frontmatter string.
       const escapedTitle = frontmatter.title.replace(/&/g, '&amp;');
       expect(builtHtml).toContain(escapedTitle);
+    }
+  });
+
+  test('presents the writing section between experience and contact', () => {
+    const experience = html.indexOf('id="experience"');
+    const writing = html.indexOf('id="writing"');
+    const contact = html.indexOf('id="contact"');
+    expect(writing).toBeGreaterThan(experience);
+    expect(contact).toBeGreaterThan(writing);
+  });
+
+  test('links to the writing index', () => {
+    expect(html).toContain('href="/writing/"');
+  });
+
+  test('advertises the feed', () => {
+    expect(html).toContain('type="application/rss+xml"');
+  });
+
+  test('the built homepage actually renders the three most recent posts', () => {
+    // The container render above cannot check this: `getCollection('posts')`
+    // is empty under Vitest, so the section renders with no cards at all. Only
+    // the built page shows which posts were selected, which is also the only
+    // place the "three most recent, drafts excluded" rule is observable.
+    const distIndex = path.resolve(__dirname, '../dist/client/index.html');
+    if (!existsSync(distIndex)) {
+      expect(
+        process.env.CI,
+        'dist/client/index.html missing — run `npm run build` first',
+      ).toBeFalsy();
+      return;
+    }
+    const builtHtml = readFileSync(distIndex, 'utf8');
+
+    const cards = builtHtml.match(/class="post-card reveal"/g) ?? [];
+    expect(cards.length).toBe(3);
+
+    // Expected set comes from the post files on disk, not a hard-coded list,
+    // so publishing a newer post that the section fails to pick up fails here.
+    const posts = readdirSync(postsDir)
+      .filter((f) => f.endsWith('.mdx'))
+      .map((file) => readPostFrontmatter(file))
+      .filter((p) => !p.draft)
+      .sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime());
+    expect(posts.length).toBeGreaterThan(3);
+
+    const escape = (title: string) => title.replace(/&/g, '&amp;');
+    for (const post of posts.slice(0, 3)) {
+      expect(builtHtml, `expected the homepage to feature "${post.title}"`).toContain(
+        escape(post.title),
+      );
+    }
+    for (const post of posts.slice(3)) {
+      expect(builtHtml, `"${post.title}" is older than the newest three`).not.toContain(
+        escape(post.title),
+      );
     }
   });
 });

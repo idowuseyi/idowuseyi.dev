@@ -1,0 +1,41 @@
+---
+import { getCollection } from 'astro:content';
+import PostCard from './PostCard.astro';
+
+// The three most recent publishable posts. The same selection rule as
+// /writing/ and the feed, kept here rather than imported because the homepage
+// wants a fixed-size teaser and the index wants everything.
+const posts = (await getCollection('posts'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+  .slice(0, 3);
+---
+<section class="writing-section" id="writing">
+  <div class="wrap">
+    <h2 class="writing-section__title">Writing</h2>
+    <p class="writing-section__lede">
+      Explaining the hard parts. Pieces published elsewhere are marked.
+    </p>
+    <div class="writing-section__list">
+      {posts.map((post) => <PostCard post={post} />)}
+    </div>
+    <p class="writing-section__more mono"><a href="/writing/">All writing →</a></p>
+  </div>
+</section>
+
+<style>
+  .writing-section {
+    padding-block: var(--space-xl);
+    border-top: 1px solid var(--border);
+  }
+  .writing-section__title {
+    font-size: var(--step-2);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .writing-section__lede { color: var(--muted); margin-top: var(--space-s); }
+  .writing-section__list { margin-top: var(--space-l); }
+  .writing-section__more { margin-top: var(--space-l); font-size: var(--step--1); }
+  .writing-section__more a { color: var(--muted); text-decoration: none; }
+  .writing-section__more a:hover { color: var(--text); }
+</style>

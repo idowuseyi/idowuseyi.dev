@@ -29,6 +29,13 @@ jobs:
         # defect in this build.
         run: npx --yes linkinator ./dist/client --recurse --silent --skip "linkedin.com,idowuseyi.dev,medium.com"
       - name: Performance budget
+        # Gates all three indexable pages (see lighthouserc.json): the
+        # homepage, /writing/ and the post page. The noindex status and tag
+        # pages are deliberately not collected — they would fail the SEO
+        # assertion for being correctly unindexable.
+        # This is also the only gate that cannot run under WSL, where Chrome
+        # resolves to the Windows binary and @lhci/cli cannot attach to it, so
+        # it is the one check a local run cannot stand in for.
         # ubuntu-latest already ships Chrome; @lhci/cli drives it directly, so
         # no browser install step is added here. --no-sandbox (set in
         # lighthouserc.json's chromeFlags) is required because the Actions

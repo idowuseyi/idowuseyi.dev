@@ -50,8 +50,15 @@ const bookingEnabled = CAL_LINK.length > 0;
   // listener to [data-cta="book"] while booking is unconfigured — those
   // anchors fall through to their own href="#contact" and the visitor
   // scrolls to the working form instead.
-  const dialog = document.getElementById('book-dialog') as HTMLDialogElement | null;
-  if (dialog) {
+  //
+  // Re-bound after every client-side navigation, for the same reason as the
+  // contact form: the ClientRouter runs an inline script once per session, and
+  // a swap brings in a fresh dialog and fresh triggers with no listeners.
+  // `loaded` is per-invocation because the new dialog's slot is empty again.
+  function initBookCall() {
+    const dialog = document.getElementById('book-dialog') as HTMLDialogElement | null;
+    if (!dialog) return;
+
     let loaded = false;
 
     // The Cal embed is only fetched once the visitor actually asks to book,
@@ -81,4 +88,7 @@ const bookingEnabled = CAL_LINK.length > 0;
       if (event.target === dialog) dialog.close();
     });
   }
+
+  initBookCall();
+  document.addEventListener('astro:after-swap', initBookCall);
 </script>
