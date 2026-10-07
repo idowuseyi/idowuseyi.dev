@@ -9,10 +9,28 @@ interface Props {
   canonicalPath?: string;
   noindex?: boolean;
   jsonLd?: Record<string, unknown>;
+  /** `article` on a post page, so unfurlers treat it as a piece of writing. */
+  ogType?: 'website' | 'article';
 }
 
-const { title, description, canonicalPath = '/', noindex = false, jsonLd } = Astro.props;
-const canonical = new URL(canonicalPath, Astro.site ?? 'https://idowuseyi.dev');
+const {
+  title,
+  description,
+  canonicalPath = '/',
+  noindex = false,
+  jsonLd,
+  ogType = 'website',
+} = Astro.props;
+const site = Astro.site ?? new URL('https://idowuseyi.dev');
+const canonical = new URL(canonicalPath, site);
+const ogImage = new URL('/og.png', site).href;
+
+// `set:html` is unescaped by design, and JSON.stringify leaves `<` intact, so
+// a literal `</script>` in any field would close this element early. Every
+// field is author-controlled frontmatter today, which makes this a hardening
+// measure rather than a live fix; `\u003c` is still valid JSON and parses back
+// to `<`.
+const jsonLdText = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : '';
 ---
 <!doctype html>
 <html lang="en">
@@ -23,16 +41,18 @@ const canonical = new URL(canonicalPath, Astro.site ?? 'https://idowuseyi.dev');
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical.href} />
     {noindex && <meta name="robots" content="noindex, follow" />}
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical.href} />
-    <meta property="og:image" content={new URL('/og.png', Astro.site ?? 'https://idowuseyi.dev').href} />
+    <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Oluwaseyi Idowu — AI systems and backend infrastructure engineer" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image:alt" content="Oluwaseyi Idowu — AI systems and backend infrastructure engineer" />
     <link rel="alternate" type="application/rss+xml" title="Oluwaseyi Idowu — Writing" href="/rss.xml" />
-    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+    {jsonLd && <script type="application/ld+json" set:html={jsonLdText} />}
     <meta name="theme-color" content="#08090A" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <noscript><style>.reveal { opacity: 1; transform: none; }</style></noscript>

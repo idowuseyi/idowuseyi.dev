@@ -19,14 +19,21 @@ const human = pubDate.toLocaleDateString('en-GB', {
 });
 
 const site = Astro.site?.href ?? 'https://idowuseyi.dev/';
+const author = { '@type': 'Person', name: 'Oluwaseyi Idowu', url: site };
+
+// `dateModified` is deliberately absent: nothing in the post schema records a
+// revision date, so emitting one would assert a fact this site does not hold.
+// `publisher` stays a Person because this is a personal site — naming an
+// Organization that does not exist would be worse than unconventional.
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'BlogPosting',
   headline: title,
   description,
   datePublished: iso,
-  author: { '@type': 'Person', name: 'Oluwaseyi Idowu', url: site },
-  publisher: { '@type': 'Person', name: 'Oluwaseyi Idowu', url: site },
+  author,
+  publisher: author,
+  image: new URL('/og.png', site).href,
   mainEntityOfPage: new URL(canonicalPath, site).href,
   keywords: tags.join(', '),
 };
@@ -36,6 +43,7 @@ const jsonLd = {
   description={description}
   canonicalPath={canonicalPath}
   jsonLd={jsonLd}
+  ogType="article"
 >
   <article class="post">
     <div class="wrap">

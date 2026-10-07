@@ -14,10 +14,14 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - name: Unit tests
-        run: npm test
+      # Build precedes the tests because two suites assert against the built
+      # output (dist/client/rss.xml and dist/client/index.html). With the old
+      # order those assertions either failed outright or skipped silently,
+      # which is how a vacuous homepage check survived several green runs.
       - name: Build
         run: npm run build
+      - name: Unit tests
+        run: npm test
       - name: Check every outbound link resolves
         # idowuseyi.dev is skipped only until the DNS cutover makes it live
         # (a later plan item) — until then the canonical/og/sitemap links to

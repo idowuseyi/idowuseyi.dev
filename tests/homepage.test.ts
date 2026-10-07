@@ -66,7 +66,13 @@ describe('homepage', () => {
   test('the built homepage actually renders the three case studies', () => {
     const distIndex = path.resolve(__dirname, '../dist/client/index.html');
     if (!existsSync(distIndex)) {
-      console.warn('Skipping: dist/client/index.html not found — run `npm run build` first.');
+      // In CI the build runs before the tests, so an absent dist is a real
+      // failure. Warning and returning here used to make this assertion pass
+      // vacuously on every CI run, because `npm test` preceded `npm run build`.
+      expect(
+        process.env.CI,
+        'dist/client/index.html missing — run `npm run build` first',
+      ).toBeFalsy();
       return;
     }
     const builtHtml = readFileSync(distIndex, 'utf8');

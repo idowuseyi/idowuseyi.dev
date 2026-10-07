@@ -1,29 +1,22 @@
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
 import type { APIContext } from 'astro';
+import { channelCustomData, publishable, toFeedItem } from '../lib/feed';
+import type { FeedEntry } from '../lib/feed';
+
+const SITE_FALLBACK = 'https://idowuseyi.dev';
 
 export async function GET(context: APIContext) {
-  const posts = (await getCollection('posts'))
-    .filter((p) => !p.data.draft)
-    .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+  const site = context.site ?? new URL(SITE_FALLBACK);
+  const entries = (await getCollection('posts')) as unknown as FeedEntry[];
 
   return rss({
     title: 'Oluwaseyi Idowu — Writing',
     description:
       'AI systems, backend infrastructure, and the things that break in production.',
-    site: context.site ?? 'https://idowuseyi.dev',
-    items: posts.map((post) => ({
-      title: post.data.title,
-      description: post.data.description,
-      pubDate: post.data.pubDate,
-      categories: post.data.tags,
-      // An external post's canonical home is its publisher. Pointing the feed
-      // item at a page this site does not have would be a dead link.
-      link:
-        post.data.kind === 'external'
-          ? post.data.url
-          : `/writing/${post.id}/`,
-    })),
-    customData: '<language>en-gb</language>',
+    site,
+    xmlns: { atom: 'http://www.w3.org/2005/Atom' },
+    items: publishable(entries).map(toFeedItem),
+    customData: channelCustomData(entries, new URL('/rss.xml', site).href),
   });
 }
