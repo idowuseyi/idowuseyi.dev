@@ -25,10 +25,17 @@ jobs:
       - name: Unit tests
         run: npm test
       - name: Check every outbound link resolves
-        # idowuseyi.dev is skipped only until the DNS cutover makes it live
-        # (a later plan item) — until then the canonical/og/sitemap links to
-        # it are a known-good failure from linkinator's point of view, not a
-        # defect in this build.
+        # idowuseyi.dev is NO LONGER skipped: the domain went live on
+        # 2026-10-08, so the canonical, og:image, sitemap and feed self-links
+        # are now verified for real rather than waved through. That took the
+        # scan from 18 links to 24 in CI (25 locally; the difference is
+        # kocontentstudios.com, declared below).
+        #
+        # kocontentstudios.com is the KO OS app: a Vercel deployment behind
+        # Cloudflare that this runner's datacenter IP cannot reach, though it
+        # answers normally elsewhere (307 -> /dashboard -> /login, 200, the
+        # real product login page). The guard below caught it by name rather
+        # than letting the count quietly drop, which is exactly its job.
         #
         # medium.com and hashnode.dev sit behind Cloudflare bot mitigation and
         # answer 403 to any automated client (verified by curl: HEAD and GET
@@ -37,7 +44,24 @@ jobs:
         # the run entirely, so the summary count silently falls and the check
         # still passes. Listing them means the links on those hosts are
         # KNOWN-UNVERIFIED by CI and have to be checked by hand.
-        run: npx --yes linkinator ./dist/client --recurse --silent --skip "linkedin.com,idowuseyi.dev,medium.com,hashnode.dev"
+        #
+        # Piped through scripts/check-links.mjs because a passing linkinator
+        # run does NOT mean every link was checked: an unreachable host is
+        # dropped from the report, not failed. That produced a false pass here
+        # twice — once for the Cloudflare-blocked publishers, and once for
+        # idowuseyi.dev itself while Bot Fight Mode was challenging this
+        # runner's datacenter IP, where CI reported success over 7 links it
+        # never fetched. The guard fails if a host the build links to is
+        # missing from the report and not named in the skip list.
+        #
+        # The skip list is defined ONCE and passed to both, so the scanner and
+        # the guard cannot drift apart — a host skipped at scan time but not
+        # declared to the guard would fail the build, which is the point.
+        run: |
+          SKIP="linkedin.com,medium.com,hashnode.dev,kocontentstudios.com"
+          npx --yes linkinator ./dist/client --recurse --format json \
+            --skip "$SKIP" > /tmp/links.json
+          node scripts/check-links.mjs /tmp/links.json ./dist/client "$SKIP"
       - name: Performance budget
         # Gates all three indexable pages (see lighthouserc.json): the
         # homepage, /writing/ and the post page. The noindex status and tag
