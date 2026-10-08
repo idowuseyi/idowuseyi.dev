@@ -2,13 +2,6 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "oluwaseyi",
   "compatibility_date": "2026-06-02",
-  "observability": {
-    "enabled": true
-  },
-  "assets": {
-    "directory": "."
-  },
-  "compatibility_flags": [
-    "nodejs_compat"
-  ]
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true }
 }

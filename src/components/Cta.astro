@@ -1,0 +1,55 @@
+---
+import { profile } from '../data/profile';
+
+interface Props {
+  placement: string;
+  align?: 'start' | 'center';
+}
+
+const { placement, align = 'start' } = Astro.props;
+---
+<div class="ctas" data-align={align}>
+  <a class="cta cta--primary" href="#contact" data-cta="book" data-placement={placement}>
+    Book a 20-min call
+  </a>
+  <a
+    class="cta cta--secondary"
+    href={profile.cvPath}
+    download
+    data-cta="cv"
+    data-placement={placement}
+  >
+    Download CV <span aria-hidden="true">↓</span>
+  </a>
+</div>
+
+<style>
+  .ctas { display: flex; flex-wrap: wrap; gap: var(--space-m); }
+  .ctas[data-align='center'] { justify-content: center; }
+
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.75rem 1.3rem;
+    border-radius: var(--radius);
+    font-size: var(--step--1);
+    font-weight: 500;
+    text-decoration: none;
+    transition: transform var(--motion-fast) var(--ease),
+                background-color var(--motion-fast) var(--ease);
+  }
+
+  .cta:hover { transform: translateY(-1px); }
+
+  .cta--primary { background: var(--accent); color: var(--base); }
+  /* derived from --accent so a token change keeps the hover state in sync */
+  .cta--primary:hover { background: color-mix(in srgb, var(--accent) 82%, white); }
+
+  .cta--secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .cta--secondary:hover { background: var(--surface); }
+</style>

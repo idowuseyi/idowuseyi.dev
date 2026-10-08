@@ -1,0 +1,120 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import SiteFooter from '../components/SiteFooter.astro';
+import '@fontsource-variable/geist';
+import '@fontsource-variable/geist-mono';
+import '../styles/tokens.css';
+
+interface Props {
+  title: string;
+  description: string;
+  canonicalPath?: string;
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown>;
+  /** `article` on a post page, so unfurlers treat it as a piece of writing. */
+  ogType?: 'website' | 'article';
+}
+
+const {
+  title,
+  description,
+  canonicalPath = '/',
+  noindex = false,
+  jsonLd,
+  ogType = 'website',
+} = Astro.props;
+const site = Astro.site ?? new URL('https://idowuseyi.dev');
+const canonical = new URL(canonicalPath, site);
+const ogImage = new URL('/og.png', site).href;
+
+// `set:html` is unescaped by design, and JSON.stringify leaves `<` intact, so
+// a literal `</script>` in any field would close this element early. Every
+// field is author-controlled frontmatter today, which makes this a hardening
+// measure rather than a live fix; `\u003c` is still valid JSON and parses back
+// to `<`.
+const jsonLdText = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : '';
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical.href} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical.href} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Oluwaseyi Idowu — AI systems and backend infrastructure engineer" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image:alt" content="Oluwaseyi Idowu — AI systems and backend infrastructure engineer" />
+    <link rel="alternate" type="application/rss+xml" title="Oluwaseyi Idowu — Writing" href="/rss.xml" />
+    {jsonLd && <script type="application/ld+json" set:html={jsonLdText} />}
+    <meta name="theme-color" content="#08090A" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    {/*
+      View transitions between the routes this site now has. A progressive
+      enhancement: without JavaScript, or in a browser without the View
+      Transitions API, every link is still an ordinary full navigation. Astro's
+      own viewtransitions.css disables all of its animations under
+      `prefers-reduced-motion`, so no extra guard is needed here.
+
+      An Astro comment rather than an HTML one: an HTML comment is served on
+      every page, and this is a note for whoever edits the layout.
+    */}
+    <ClientRouter />
+  </head>
+  <body>
+    <slot />
+    <SiteFooter />
+    {/*
+      Re-run on every client-side navigation, not just the first page of a
+      session. The ClientRouter will not re-execute an inline script whose text
+      it has already run (deselectScripts in
+      astro/dist/transitions/swap-functions.js keys on textContent), and this
+      script is byte-identical on every page. Left as a one-shot it would leave
+      every `.reveal` element on a navigated-to page stuck at the `opacity: 0`
+      it starts from — a blank page after clicking any internal link.
+
+      `astro:after-swap` rather than `data-astro-rerun`: the attribute would
+      force the script inline, costing its minification and its module scope,
+      and a re-run of a classic top-level `const` throws a redeclaration
+      error. `astro:after-swap` fires once per swap with the new DOM already in
+      place and before the transition paints, so there is no flash of the
+      pre-reveal state.
+    */}
+    <script>
+      let observer: IntersectionObserver | null = null;
+
+      function initReveal() {
+        // The previous page's observer still holds its now-detached nodes.
+        observer?.disconnect();
+        observer = null;
+
+        const nodes = document.querySelectorAll('.reveal');
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduced || !('IntersectionObserver' in window)) {
+          nodes.forEach((n) => n.classList.add('is-visible'));
+          return;
+        }
+        const io = new IntersectionObserver((entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            entry.target.classList.add('is-visible');
+            io.unobserve(entry.target);
+          }
+        }, { rootMargin: '0px 0px -10% 0px' });
+        observer = io;
+        nodes.forEach((n) => io.observe(n));
+      }
+
+      initReveal();
+      document.addEventListener('astro:after-swap', initReveal);
+    </script>
+  </body>
+</html>

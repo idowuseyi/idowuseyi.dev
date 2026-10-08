@@ -1,0 +1,40 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SiteHeader from '../../components/SiteHeader.astro';
+import PostCard from '../../components/PostCard.astro';
+
+const posts = (await getCollection('posts'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+---
+<BaseLayout
+  title="Writing — Oluwaseyi Idowu"
+  description="Technical writing on AI systems, backend infrastructure and the things that break in production."
+  canonicalPath="/writing/"
+>
+  <SiteHeader />
+  <main class="writing" id="main">
+    <div class="wrap">
+      <h1 class="writing__title">Writing</h1>
+      <p class="writing__lede">
+        AI systems, backend infrastructure, and the things that break in production.
+        Pieces published elsewhere are marked and link out.
+      </p>
+      <div class="writing__list">
+        {posts.map((post) => <PostCard post={post} headingLevel={2} />)}
+      </div>
+      <p class="writing__feed mono"><a href="/rss.xml">RSS feed</a></p>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .writing { padding-block: var(--space-xl); }
+  .writing__title { font-size: var(--step-2); font-weight: 600; letter-spacing: -0.02em; }
+  .writing__lede { color: var(--muted); margin-top: var(--space-s); max-width: 68ch; }
+  .writing__list { margin-top: var(--space-l); }
+  .writing__feed { margin-top: var(--space-l); font-size: var(--step--1); }
+  .writing__feed a { color: var(--muted); }
+  .writing__feed a:hover { color: var(--text); }
+</style>

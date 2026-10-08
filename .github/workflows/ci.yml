@@ -1,0 +1,57 @@
+name: ci
+on:
+  push:
+    branches: [redesign/v2, main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      # v5 on both: v4 targets Node 20, which GitHub has deprecated and is
+      # currently force-running on Node 24. That fallback goes away.
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # Build precedes the tests because two suites assert against the built
+      # output (dist/client/rss.xml and dist/client/index.html). With the old
+      # order those assertions either failed outright or skipped silently,
+      # which is how a vacuous homepage check survived several green runs.
+      - name: Build
+        run: npm run build
+      - name: Unit tests
+        run: npm test
+      - name: Check every outbound link resolves
+        # idowuseyi.dev is skipped only until the DNS cutover makes it live
+        # (a later plan item) — until then the canonical/og/sitemap links to
+        # it are a known-good failure from linkinator's point of view, not a
+        # defect in this build.
+        #
+        # medium.com and hashnode.dev sit behind Cloudflare bot mitigation and
+        # answer 403 to any automated client (verified by curl: HEAD and GET
+        # both 403). They are listed here to make that explicit, because
+        # linkinator does NOT report such a link as broken — it drops it from
+        # the run entirely, so the summary count silently falls and the check
+        # still passes. Listing them means the links on those hosts are
+        # KNOWN-UNVERIFIED by CI and have to be checked by hand.
+        run: npx --yes linkinator ./dist/client --recurse --silent --skip "linkedin.com,idowuseyi.dev,medium.com,hashnode.dev"
+      - name: Performance budget
+        # Gates all three indexable pages (see lighthouserc.json): the
+        # homepage, /writing/ and the post page. The noindex status and tag
+        # pages are deliberately not collected — they would fail the SEO
+        # assertion for being correctly unindexable.
+        # This is also the only gate that cannot run under WSL, where Chrome
+        # resolves to the Windows binary and @lhci/cli cannot attach to it, so
+        # it is the one check a local run cannot stand in for.
+        # ubuntu-latest already ships Chrome; @lhci/cli drives it directly, so
+        # no browser install step is added here. --no-sandbox (set in
+        # lighthouserc.json's chromeFlags) is required because the Actions
+        # runner executes as root.
+        # Fetched on demand rather than declared as a devDependency: its
+        # Lighthouse/Puppeteer tree carries 14 high-severity advisories that are
+        # not exploitable here (dev-only, trusted inputs) but have no patched
+        # release, and leaving them in the lockfile makes `npm audit` unreadable.
+        run: npx --yes @lhci/cli@0.15.1 autorun

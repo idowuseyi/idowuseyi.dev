@@ -1,0 +1,39 @@
+---
+import Cta from './Cta.astro';
+import ContactForm from './ContactForm.astro';
+import { profile } from '../data/profile';
+---
+<section class="contact-section" id="contact">
+  <div class="wrap">
+    <h2 class="contact-section__title">Get in touch</h2>
+    <p class="contact-section__lede">
+      Open to senior and staff engineering roles. Contract and fractional work considered.
+    </p>
+
+    <Cta placement="contact" />
+
+    <div class="contact-section__form">
+      <ContactForm />
+    </div>
+
+    <p class="contact-section__links mono">
+      <a href={profile.github}>GitHub</a>
+      <a href={profile.linkedin}>LinkedIn</a>
+    </p>
+  </div>
+</section>
+
+<style>
+  .contact-section { padding-block: var(--space-xl); border-top: 1px solid var(--border); }
+  .contact-section__title { font-size: var(--step-2); font-weight: 600; letter-spacing: -0.02em; }
+  .contact-section__lede { color: var(--muted); margin-block: var(--space-s) var(--space-l); }
+
+  .contact-section__form { margin-top: var(--space-xl); }
+  .contact-section__links {
+    display: flex;
+    gap: var(--space-m);
+    margin-top: var(--space-l);
+    font-size: var(--step--1);
+  }
+  .contact-section__links a { color: var(--muted); }
+</style>

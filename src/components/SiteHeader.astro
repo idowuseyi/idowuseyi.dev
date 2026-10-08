@@ -1,0 +1,66 @@
+---
+import Brand from './Brand.astro';
+import BookCall from './BookCall.astro';
+---
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="header">
+  <div class="wrap header__inner">
+    <Brand />
+    <nav class="header__nav mono" aria-label="Primary">
+      <a href="/#work">Work</a>
+      <a href="/#experience">Experience</a>
+      <a href="/#contact">Contact</a>
+      <a class="header__cta" href="/#contact" data-cta="book" data-placement="header">Book a call</a>
+    </nav>
+  </div>
+</header>
+
+<BookCall />
+
+<style>
+  /* Visible only when focused, so keyboard users can get past the sticky
+     header that now sits on every page type. */
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    z-index: 20;
+    padding: 0.6rem 1rem;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+  }
+  .skip-link:focus-visible { left: var(--space-m); top: var(--space-m); }
+
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: color-mix(in srgb, var(--base) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 0.8rem;
+  }
+  .header__nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-m);
+    font-size: var(--step--1);
+  }
+  .header__nav a { color: var(--muted); text-decoration: none; }
+  .header__nav a:hover { color: var(--text); }
+  .header__cta {
+    color: var(--base) !important;
+    background: var(--accent);
+    padding: 0.4rem 0.85rem;
+    border-radius: var(--radius);
+  }
+  @media (max-width: 560px) {
+    .header__nav a:not(.header__cta) { display: none; }
+  }
+</style>

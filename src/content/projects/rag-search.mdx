@@ -1,0 +1,26 @@
+---
+title: RAG & semantic search service
+kicker: Retrieval
+role: Backend Engineer
+order: 2
+blurb: A document ingestion and semantic search service — chunking with overlap, vector storage in ChromaDB, and a documented API.
+tags: ['NestJS', 'TypeScript', 'ChromaDB', 'Embeddings', 'Docker', 'Swagger']
+metrics:
+  - { value: '500', label: 'Words per chunk' }
+  - { value: '50', label: 'Word overlap' }
+  - { value: '3', label: 'Ingest formats' }
+evidence: linked
+repoUrl: 'https://github.com/idowuseyi/nest-rag-service'
+---
+
+Retrieval quality is decided at ingestion, not at query time. Chunk on the wrong
+boundary and the right answer is split across two vectors that each look
+mediocre.
+
+This service ingests PDF, DOCX and TXT, extracts text, then chunks on words —
+500 per chunk with a 50-word overlap — so context surviving a boundary is
+retrievable from either side of it. Embeddings are stored in ChromaDB for
+vector search.
+
+Built on NestJS and containerised with Docker, with the API documented in
+Swagger so it can be exercised directly rather than read about.

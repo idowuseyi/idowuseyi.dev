@@ -1,0 +1,104 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import TagList from '../components/TagList.astro';
+import '../styles/prose.css';
+
+interface Props {
+  title: string;
+  description: string;
+  pubDate: Date;
+  tags: string[];
+  minutes: number;
+  canonicalPath: string;
+}
+
+const { title, description, pubDate, tags, minutes, canonicalPath } = Astro.props;
+const iso = pubDate.toISOString();
+const human = pubDate.toLocaleDateString('en-GB', {
+  day: 'numeric', month: 'long', year: 'numeric',
+});
+
+const site = Astro.site?.href ?? 'https://idowuseyi.dev/';
+const author = { '@type': 'Person', name: 'Oluwaseyi Idowu', url: site };
+
+// `dateModified` is deliberately absent: nothing in the post schema records a
+// revision date, so emitting one would assert a fact this site does not hold.
+// `publisher` stays a Person because this is a personal site — naming an
+// Organization that does not exist would be worse than unconventional.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: title,
+  description,
+  datePublished: iso,
+  author,
+  publisher: author,
+  image: new URL('/og.png', site).href,
+  mainEntityOfPage: new URL(canonicalPath, site).href,
+  keywords: tags.join(', '),
+};
+---
+<BaseLayout
+  title={`${title} — Oluwaseyi Idowu`}
+  description={description}
+  canonicalPath={canonicalPath}
+  jsonLd={jsonLd}
+  ogType="article"
+>
+  {/*
+    A post is the likeliest entry point from search, LinkedIn or the feed, and
+    without this it offered four links: three tags and "All writing". No route
+    to the work, the CV or a call. Every other page type already had it.
+  */}
+  <SiteHeader />
+  <main id="main">
+  <article class="post">
+    <div class="wrap">
+      <header class="post__head">
+        <p class="post__meta mono">
+          <time datetime={iso}>{human}</time> · {minutes} minute read
+        </p>
+        <h1 class="post__title">{title}</h1>
+        <p class="post__standfirst">{description}</p>
+        <TagList tags={tags} />
+      </header>
+
+      <div class="prose">
+        <slot />
+      </div>
+
+      <footer class="post__foot">
+        <a class="post__back" href="/writing/">← All writing</a>
+      </footer>
+    </div>
+  </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .post { padding-block: var(--space-xl); }
+  .post__head {
+    display: grid;
+    gap: var(--space-s);
+    max-width: 68ch;
+    padding-bottom: var(--space-l);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: var(--space-l);
+  }
+  .post__meta { color: var(--muted); font-size: var(--step--1); }
+  .post__title {
+    font-size: var(--step-2);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+  .post__standfirst { color: var(--muted); font-size: var(--step-1); line-height: 1.5; }
+  .post__foot {
+    margin-top: var(--space-xl);
+    padding-top: var(--space-l);
+    border-top: 1px solid var(--border);
+  }
+  .post__back { color: var(--muted); font-size: var(--step--1); text-decoration: none; }
+  .post__back:hover { color: var(--text); }
+</style>

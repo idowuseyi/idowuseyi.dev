@@ -1,0 +1,22 @@
+---
+import StatusPage from '../layouts/StatusPage.astro';
+
+// Static redirect target for the no-JS (plain HTML form POST) contact path:
+// /api/contact 303s here on failure instead of baking a `?error=1` query
+// param into the prerendered homepage, which can't react to a query string
+// once it's a static file. Never echoes any submitted field or internal
+// error detail — only a fixed, generic message.
+---
+<StatusPage
+  title="Message not sent — Oluwaseyi Idowu"
+  description="Your message could not be sent."
+  heading="Something went wrong."
+  canonicalPath="/contact-error/"
+>
+  <p slot="eyebrow" class="status-page__eyebrow mono">Message not sent</p>
+  <p class="status-page__body">
+    Your message could not be sent. Please try again, or email
+    <a class="status-page__link" href="mailto:hello@idowuseyi.dev">hello@idowuseyi.dev</a> directly.
+  </p>
+  <a class="status-page__link" href="/#contact">&larr; Back to the contact form</a>
+</StatusPage>

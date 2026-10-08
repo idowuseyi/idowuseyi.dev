@@ -1,0 +1,56 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import SiteHeader from '../../../components/SiteHeader.astro';
+import PostCard from '../../../components/PostCard.astro';
+import { groupByTagSlug, tagSlug } from '../../../lib/tags';
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const posts = (await getCollection('posts')).filter((p) => !p.data.draft);
+  const bySlug = groupByTagSlug(posts);
+
+  return [...bySlug.entries()]
+    // Only tags carried by a native post get a page. `TagList` renders in
+    // exactly one place — `PostLayout` — so a tag that appears only on
+    // external posts (which have no page here, and whose cards show no tags)
+    // would be built, deployed, noindex'd, left out of the sitemap, and
+    // reachable by nothing. Eight of eleven tag pages were orphans that way.
+    // The page itself still lists every post with the tag, native or not.
+    .filter(([, { posts: tagged }]) => tagged.some((p) => p.data.kind === 'native'))
+    .map(([slug, { label, posts: tagged }]) => ({
+    params: { tag: slug },
+    props: {
+      label,
+      posts: tagged.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()),
+    },
+  }));
+};
+
+const { label, posts } = Astro.props;
+---
+<BaseLayout
+  title={`${label} — Writing — Oluwaseyi Idowu`}
+  description={`Posts tagged ${label}.`}
+  canonicalPath={`/writing/tags/${tagSlug(label)}/`}
+  noindex={true}
+>
+  <SiteHeader />
+  <main class="tagpage" id="main">
+    <div class="wrap">
+      <p class="tagpage__kicker mono"><a href="/writing/">Writing</a> / tag</p>
+      <h1 class="tagpage__title">{label}</h1>
+      <div class="tagpage__list">
+        {posts.map((post) => <PostCard post={post} headingLevel={2} />)}
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .tagpage { padding-block: var(--space-xl); }
+  .tagpage__kicker { color: var(--muted); font-size: var(--step--1); }
+  .tagpage__kicker a { color: inherit; }
+  .tagpage__title { font-size: var(--step-2); font-weight: 600; margin-top: var(--space-s); }
+  .tagpage__list { margin-top: var(--space-l); }
+</style>
