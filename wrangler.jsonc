@@ -3,5 +3,10 @@
   "name": "oluwaseyi",
   "compatibility_date": "2026-06-02",
   "compatibility_flags": ["nodejs_compat"],
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
+  // Declared here rather than set in the dashboard so the binding lives with
+  // the code: a redeploy cannot silently drop it, and the repo states which
+  // hostname this Worker owns. `custom_domain` provisions the proxied DNS
+  // record on the zone and issues the certificate.
+  "routes": [{ "pattern": "idowuseyi.dev", "custom_domain": true }]
 }
