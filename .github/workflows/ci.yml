@@ -25,10 +25,10 @@ jobs:
       - name: Unit tests
         run: npm test
       - name: Check every outbound link resolves
-        # idowuseyi.dev is skipped only until the DNS cutover makes it live
-        # (a later plan item) — until then the canonical/og/sitemap links to
-        # it are a known-good failure from linkinator's point of view, not a
-        # defect in this build.
+        # idowuseyi.dev is NO LONGER skipped: the domain went live on
+        # 2026-10-08, so the canonical, og:image, sitemap and feed self-links
+        # are now verified for real rather than waved through. That took the
+        # scan from 18 links to 25.
         #
         # medium.com and hashnode.dev sit behind Cloudflare bot mitigation and
         # answer 403 to any automated client (verified by curl: HEAD and GET
@@ -37,7 +37,7 @@ jobs:
         # the run entirely, so the summary count silently falls and the check
         # still passes. Listing them means the links on those hosts are
         # KNOWN-UNVERIFIED by CI and have to be checked by hand.
-        run: npx --yes linkinator ./dist/client --recurse --silent --skip "linkedin.com,idowuseyi.dev,medium.com,hashnode.dev"
+        run: npx --yes linkinator ./dist/client --recurse --silent --skip "linkedin.com,medium.com,hashnode.dev"
       - name: Performance budget
         # Gates all three indexable pages (see lighthouserc.json): the
         # homepage, /writing/ and the post page. The noindex status and tag
