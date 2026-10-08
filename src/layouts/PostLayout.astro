@@ -1,5 +1,6 @@
 ---
 import BaseLayout from './BaseLayout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
 import TagList from '../components/TagList.astro';
 import '../styles/prose.css';
 
@@ -45,6 +46,12 @@ const jsonLd = {
   jsonLd={jsonLd}
   ogType="article"
 >
+  {/*
+    A post is the likeliest entry point from search, LinkedIn or the feed, and
+    without this it offered four links: three tags and "All writing". No route
+    to the work, the CV or a call. Every other page type already had it.
+  */}
+  <SiteHeader />
   <article class="post">
     <div class="wrap">
       <header class="post__head">
