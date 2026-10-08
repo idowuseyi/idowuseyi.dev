@@ -73,6 +73,30 @@ through to its `href="#contact"` and scrolls to the contact form instead of
 opening a dialog. Setting `CAL_LINK` to the real slug (e.g. `'idowuseyi/20min'`)
 is the only change needed to activate the booking dialog.
 
+## Cloudflare Workers Builds
+
+The Workers Builds integration **must run `npm run build` before its deploy
+command.** Set it in the dashboard under the Worker's Settings → Build →
+"Build command"; an empty build command fails every time with:
+
+    ✘ [ERROR] Missing entry-point to Worker script or to assets directory
+
+That error is misleading. The entry point is not missing from the config — it
+is generated. `wrangler.jsonc` in this repo carries no `main` and no `assets`
+on purpose, because `astro build` (through `@astrojs/cloudflare`) writes:
+
+  - `dist/server/wrangler.json` — the complete config, with `main: entry.mjs`
+    and `assets.directory: ../client`
+  - `.wrangler/deploy/config.json` — a redirect pointing wrangler at it
+
+`.wrangler/` is gitignored, so neither file reaches the build container. With
+no build step, wrangler falls back to the bare `wrangler.jsonc` and finds
+nothing to deploy. Reproduce locally by moving `dist/` aside and running
+`npx wrangler versions upload --dry-run`.
+
+`versions upload` is the preview path used for pull requests. The production
+branch should deploy with `npx wrangler deploy`.
+
 ## Regenerating a diagram
 
 Diagrams under `src/diagrams/` (e.g. `ko-os.svg`) are authored as Mermaid
