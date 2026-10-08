@@ -52,8 +52,9 @@ if (!result.success) {
 
 The practical consequences are worth stating plainly:
 
-- **Failures are local.** A bad generation throws at the parse site, with the
-  offending field named.
+- **Failures are local.** A bad generation fails at the parse site, with the
+  offending field named — `safeParse` hands you that error instead of letting
+  a wrong value travel.
 - **Prompts become refactorable.** Rewording a prompt is safe, because the
   schema still gates the result.
 - **The schema is testable without a model.** You can assert that malformed

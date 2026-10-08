@@ -11,7 +11,7 @@ interface Props {
 const { title, description, heading, canonicalPath } = Astro.props;
 ---
 <BaseLayout title={title} description={description} canonicalPath={canonicalPath} noindex={true}>
-  <main class="status-page">
+  <main class="status-page" id="main">
     <div class="wrap">
       <slot name="eyebrow" />
       <h1 class="status-page__title">{heading}</h1>

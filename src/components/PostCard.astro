@@ -4,9 +4,17 @@ import { readingTime } from '../lib/reading-time';
 
 interface Props {
   post: CollectionEntry<'posts'>;
+  /**
+   * The card's own heading level. On the homepage the list sits under the
+   * Writing section's <h2>, so h3 is right. On /writing/ and the tag pages the
+   * card is the first thing under the page <h1>, where a fixed h3 skipped a
+   * level and tripped axe's heading-order rule.
+   */
+  headingLevel?: 2 | 3;
 }
 
-const { post } = Astro.props;
+const { post, headingLevel = 3 } = Astro.props;
+const Heading = `h${headingLevel}` as 'h2' | 'h3';
 const d = post.data;
 const isExternal = d.kind === 'external';
 
@@ -28,7 +36,7 @@ const minutes = isExternal ? null : readingTime(post.body ?? '');
       {minutes !== null && <span> · {minutes} minute read</span>}
       {isExternal && <span class="post-card__badge">{d.platform} ↗</span>}
     </p>
-    <h3 class="post-card__title">{d.title}</h3>
+    <Heading class="post-card__title">{d.title}</Heading>
     <p class="post-card__desc">{d.description}</p>
   </a>
 </article>

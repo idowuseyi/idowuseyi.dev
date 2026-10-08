@@ -10,7 +10,15 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const posts = (await getCollection('posts')).filter((p) => !p.data.draft);
   const bySlug = groupByTagSlug(posts);
 
-  return [...bySlug.entries()].map(([slug, { label, posts: tagged }]) => ({
+  return [...bySlug.entries()]
+    // Only tags carried by a native post get a page. `TagList` renders in
+    // exactly one place — `PostLayout` — so a tag that appears only on
+    // external posts (which have no page here, and whose cards show no tags)
+    // would be built, deployed, noindex'd, left out of the sitemap, and
+    // reachable by nothing. Eight of eleven tag pages were orphans that way.
+    // The page itself still lists every post with the tag, native or not.
+    .filter(([, { posts: tagged }]) => tagged.some((p) => p.data.kind === 'native'))
+    .map(([slug, { label, posts: tagged }]) => ({
     params: { tag: slug },
     props: {
       label,
@@ -28,12 +36,12 @@ const { label, posts } = Astro.props;
   noindex={true}
 >
   <SiteHeader />
-  <main class="tagpage">
+  <main class="tagpage" id="main">
     <div class="wrap">
       <p class="tagpage__kicker mono"><a href="/writing/">Writing</a> / tag</p>
       <h1 class="tagpage__title">{label}</h1>
       <div class="tagpage__list">
-        {posts.map((post) => <PostCard post={post} />)}
+        {posts.map((post) => <PostCard post={post} headingLevel={2} />)}
       </div>
     </div>
   </main>

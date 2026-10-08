@@ -22,8 +22,10 @@ const native = z
   })
   .strict();
 
-// Published elsewhere. The body is a short standfirst for the card; the
-// article itself lives at `url`, which keeps that publisher's canonical.
+// Published elsewhere. The article itself lives at `url`, which keeps that
+// publisher's canonical. Only `description` is ever rendered (PostCard and the
+// feed both use it); an external post's MDX body is authored context for
+// whoever edits the file and reaches no page.
 const external = z
   .object({
     ...common,

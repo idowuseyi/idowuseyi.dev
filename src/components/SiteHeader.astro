@@ -2,10 +2,11 @@
 import Brand from './Brand.astro';
 import BookCall from './BookCall.astro';
 ---
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="header">
   <div class="wrap header__inner">
     <Brand />
-    <nav class="header__nav mono">
+    <nav class="header__nav mono" aria-label="Primary">
       <a href="/#work">Work</a>
       <a href="/#experience">Experience</a>
       <a href="/#contact">Contact</a>
@@ -17,6 +18,20 @@ import BookCall from './BookCall.astro';
 <BookCall />
 
 <style>
+  /* Visible only when focused, so keyboard users can get past the sticky
+     header that now sits on every page type. */
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    z-index: 20;
+    padding: 0.6rem 1rem;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+  }
+  .skip-link:focus-visible { left: var(--space-m); top: var(--space-m); }
+
   .header {
     position: sticky;
     top: 0;

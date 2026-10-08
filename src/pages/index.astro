@@ -9,7 +9,6 @@ import Cta from '../components/Cta.astro';
 import Timeline from '../components/Timeline.astro';
 import Writing from '../components/Writing.astro';
 import Contact from '../components/Contact.astro';
-import { profile } from '../data/profile';
 
 const projects = (await getCollection('projects')).sort(
   (a, b) => a.data.order - b.data.order,
@@ -21,7 +20,7 @@ const projects = (await getCollection('projects')).sort(
 >
   <SiteHeader />
 
-  <main id="hero">
+  <main id="main">
     <Hero />
 
     <div class="wrap"><ProofStrip /></div>
@@ -45,10 +44,6 @@ const projects = (await getCollection('projects')).sort(
     <Writing />
     <Contact />
   </main>
-
-  <footer class="footer">
-    <div class="wrap mono">© 2026 {profile.name}</div>
-  </footer>
 </BaseLayout>
 
 <style>
@@ -64,9 +59,4 @@ const projects = (await getCollection('projects')).sort(
   .cta-break__inner { display: grid; gap: var(--space-l); justify-items: center; text-align: center; }
   .cta-break__line { font-size: var(--step-1); }
 
-  .footer {
-    padding-block: var(--space-l);
-    color: var(--muted);
-    font-size: var(--step--1);
-  }
 </style>

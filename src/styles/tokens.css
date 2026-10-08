@@ -25,6 +25,8 @@
   --space-l: 2rem;
   --space-xl: clamp(4rem, 8vw, 7rem);
   --radius: 8px;
+  /* Inline code and other small chips, which need a tighter corner than a card. */
+  --radius-s: 4px;
 
   /* motion */
   --motion-fast: 140ms;
@@ -62,10 +64,21 @@ a { color: inherit; }
   font-variant-numeric: tabular-nums;
 }
 
-.reveal {
-  opacity: 0;
-  transform: translateY(12px);
-  transition: opacity var(--motion-base) var(--ease), transform var(--motion-base) var(--ease);
+/*
+  Gated on `scripting: enabled`, because only JavaScript ever removes this.
+  Unconditionally, a visitor with JS off got opacity 0 with nothing to undo
+  it, which emptied /writing/ and every tag page — their entire content is
+  .reveal. The <noscript> override that was supposed to cover this could not:
+  it sits in <head> BEFORE this stylesheet, same specificity, no !important,
+  so this rule won on source order and the fallback never once applied.
+  A browser that does not support the query simply shows the content.
+*/
+@media (scripting: enabled) {
+  .reveal {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity var(--motion-base) var(--ease), transform var(--motion-base) var(--ease);
+  }
 }
 
 .reveal.is-visible { opacity: 1; transform: none; }

@@ -14,7 +14,7 @@ const posts = (await getCollection('posts'))
   canonicalPath="/writing/"
 >
   <SiteHeader />
-  <main class="writing">
+  <main class="writing" id="main">
     <div class="wrap">
       <h1 class="writing__title">Writing</h1>
       <p class="writing__lede">
@@ -22,7 +22,7 @@ const posts = (await getCollection('posts'))
         Pieces published elsewhere are marked and link out.
       </p>
       <div class="writing__list">
-        {posts.map((post) => <PostCard post={post} />)}
+        {posts.map((post) => <PostCard post={post} headingLevel={2} />)}
       </div>
       <p class="writing__feed mono"><a href="/rss.xml">RSS feed</a></p>
     </div>

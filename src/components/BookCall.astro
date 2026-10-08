@@ -48,8 +48,8 @@ const bookingEnabled = CAL_LINK.length > 0;
   // Only ever finds the dialog when CAL_LINK is non-empty (BookCall.astro
   // renders no <dialog> at all otherwise), so this never attaches a
   // listener to [data-cta="book"] while booking is unconfigured — those
-  // anchors fall through to their own href="#contact" and the visitor
-  // scrolls to the working form instead.
+  // anchors fall through to their own href (`/#contact` in the header) and
+  // the visitor reaches the working form instead.
   //
   // Re-bound after every client-side navigation, for the same reason as the
   // contact form: the ClientRouter runs an inline script once per session, and
