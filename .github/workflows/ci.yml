@@ -27,7 +27,15 @@ jobs:
         # (a later plan item) — until then the canonical/og/sitemap links to
         # it are a known-good failure from linkinator's point of view, not a
         # defect in this build.
-        run: npx --yes linkinator ./dist/client --recurse --silent --skip "linkedin.com,idowuseyi.dev,medium.com"
+        #
+        # medium.com and hashnode.dev sit behind Cloudflare bot mitigation and
+        # answer 403 to any automated client (verified by curl: HEAD and GET
+        # both 403). They are listed here to make that explicit, because
+        # linkinator does NOT report such a link as broken — it drops it from
+        # the run entirely, so the summary count silently falls and the check
+        # still passes. Listing them means the links on those hosts are
+        # KNOWN-UNVERIFIED by CI and have to be checked by hand.
+        run: npx --yes linkinator ./dist/client --recurse --silent --skip "linkedin.com,idowuseyi.dev,medium.com,hashnode.dev"
       - name: Performance budget
         # Gates all three indexable pages (see lighthouserc.json): the
         # homepage, /writing/ and the post page. The noindex status and tag

@@ -60,6 +60,6 @@ export const experience = [
     title: 'Technical Writer',
     org: 'OpenReplay — Open-Source Developer Tool',
     summary:
-      'Developer-focused technical content and implementation tutorials covering frontend architecture, APIs and modern JavaScript ecosystems. Also published with Mastra.ai, Medium and Dev.to.',
+      'Developer-focused technical content and implementation tutorials covering frontend architecture, APIs and modern JavaScript ecosystems. Also published on Hashnode, Medium and Dev.to.',
   },
 ] as const;
